@@ -1,0 +1,138 @@
+/* Overall Layout */
+.authPage {
+    display: flex;
+    height: 100vh;
+}
+
+/* Left Section - Fullscreen Background */
+.left-section {
+    flex: 1.5;
+    position: relative;
+    background: url('/../../public/hero.jpg') no-repeat center center/cover;
+    background-size: cover;  
+    background-position: center;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    clip-path: polygon(0 0, 65% 0, 100% 100%, 0% 100%);
+}
+
+.left-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(255, 255, 255, 0));
+    clip-path: polygon(0 0, 65% 0, 100% 100%, 0% 100%);
+}
+
+.left-content {
+    position: relative;
+    text-align: center;
+    z-index: 2;
+}
+
+.left-content h1 {
+    font-size: 1.5rem;  /* Smaller */
+    font-weight: bold;
+}
+
+.left-content p {
+    font-size: 0.8rem;  /* Smaller */
+}
+
+/* Right Section */
+.right-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+}
+
+/* Login Box */
+.login-container {
+    background: white;
+    padding: 30px;  /* Reduced padding */
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 360px;  /* Slightly smaller width */
+    text-align: center;
+}
+
+.login-container h3 {
+    margin-bottom: 10px;
+    font-size: 0.9rem;  /* Smaller */
+}
+
+/* Input Fields */
+.inputTag {
+    margin-bottom: 8px;
+    text-align: left;
+    font-weight: 100;
+    font-size: 0.4rem;
+}
+
+.inputTag label {
+    font-weight: 500;
+    font-size: 0.8rem;  /* Smaller */
+    display: block;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.input-group input {
+    border: none;
+    outline: none;
+    width: 100%;
+    padding: 6px;  /* Smaller */
+    font-weight: 300;
+    font-size: 0.8rem;
+}
+
+.input-icon {
+    margin-right: 6px;
+    font-size: 0.9rem;  /* Smaller */
+    color: #007bff;
+}
+
+/* Login Button */
+button {
+    width: 100%;
+    background: #007bff;
+    color: white;
+    padding: 8px;  /* Smaller */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;  /* Smaller */
+    margin-top: 8px;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+/* Register Link */
+.register-link {
+    margin-top: 8px;
+    display: block;
+    color: #007bff;
+    font-size: 0.8rem;  /* Smaller */
+    text-decoration: none;
+}
+
+.register-link:hover {
+    text-decoration: underline;
+}

@@ -1,0 +1,39 @@
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh; /* Full-screen height for a prominent hero section */
+  background: linear-gradient(135deg, #007bff, #00c4cc); /* Gradient background */
+  padding: 2rem;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 3rem; /* Large, bold heading */
+  color: #fff;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
+.hero h4 {
+  font-size: 1.5rem; /* Slightly smaller subheading */
+  color: #f0f0f0;
+  margin-bottom: 2rem;
+  font-weight: 400;
+  max-width: 40rem; /* Constrain width for readability */
+}
+
+.box {
+  max-width: 24rem; /* Medium size from your earlier request */
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95); /* Slightly transparent white */
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Shadow from .register-container */
+  color: #333;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-left: auto; /* Optional: uncomment to align right */
+  /* margin-right: auto; */ /* Optional: uncomment to center (default) */
+}
