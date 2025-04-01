@@ -52,24 +52,24 @@ const Applications = () => {
                     </p>
                     <p className="sub-sec">
                       <span>Applicant's Name: </span>{" "}
-                      {element.StudentInfo.name}
+                      {element.studentInfo.name}
                     </p>
                     <p className="sub-sec">
                       <span>Applicant's Email:</span>{" "}
-                      {element.StudentInfo.email}
+                      {element.studentInfo.email}
                     </p>
                     <p className="sub-sec">
                       <span>Applicant's Phone: </span>{" "}
-                      {element.StudentInfo.phone}
+                      {element.studentInfo.phone}
                     </p>
                     <p className="sub-sec">
                       <span>Applicant's Address: </span>{" "}
-                      {element.StudentInfo.address}
+                      {element.studentInfo.address}
                     </p>
                     <p className="sub-sec">
                       <span>Applicant's CoverLetter: </span>
                       <textarea
-                        value={element.StudentInfo.coverLetter}
+                        value={element.studentInfo.coverLetter}
                         rows={5}
                         disabled
                       ></textarea>
@@ -83,8 +83,8 @@ const Applications = () => {
                       </button>
                       <Link
                         to={
-                          element.StudentInfo &&
-                          element.StudentInfo.resume.url
+                          element.studentInfo &&
+                          element.studentInfo.resume.url
                         }
                         className="btn"
                         target="_blank"

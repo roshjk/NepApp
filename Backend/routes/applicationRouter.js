@@ -10,26 +10,28 @@ import {
 const router = express.Router();
 
 router.post(
-  "/post/:id",
+  "/apply/:id",
   isAuthenticated,
   isAuthorized("Student"),
   postApplication
 );
 
 router.get(
-  "/business/getall",
+ "/business/applications",
   isAuthenticated,
   isAuthorized("Business"),
   businessGetAllApplication
 );
 
 router.get(
-  "/student/getall",
+  "/student/applications",
   isAuthenticated,
-  isAuthorized("Student"),
   studentGetAllApplication
 );
 
-router.delete("/delete/:id", isAuthenticated, deleteApplication);
+router.delete(
+  "/delete/:id",
+  isAuthenticated,
+  deleteApplication);
 
 export default router;

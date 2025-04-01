@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./AdminDashboard.css"; // Import CSS file
+import "./AdminDashboard.css";
 
 const API_BASE_URL = "http://localhost:4000/api/admin";
 
@@ -22,9 +22,6 @@ const AdminDashboard = () => {
     fetchApplications();
   }, [isAuthenticated, user, navigate]);
 
-
-
-  // Fetch users
   const fetchUsers = async () => {
     try {
       const { data } = await axios.get(`${API_BASE_URL}/users`, { withCredentials: true });
@@ -34,7 +31,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Fetch jobs
   const fetchJobs = async () => {
     try {
       const { data } = await axios.get(`${API_BASE_URL}/jobs`, { withCredentials: true });
@@ -44,7 +40,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Fetch applications
   const fetchApplications = async () => {
     try {
       const { data } = await axios.get(`${API_BASE_URL}/applications`, { withCredentials: true });
@@ -54,7 +49,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Delete user
   const deleteUser = async (id) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
@@ -66,7 +60,15 @@ const AdminDashboard = () => {
     }
   };
 
-  // Delete job
+  const updateUser = async (id, updatedData) => {
+    try {
+      const { data } = await axios.put(`${API_BASE_URL}/user/${id}`, updatedData, { withCredentials: true });
+      setUsers(users.map((user) => (user._id === id ? data : user)));
+    } catch (error) {
+      console.error("Error updating user:", error.response?.data?.message);
+    }
+  };
+
   const deleteJob = async (id) => {
     if (window.confirm("Are you sure you want to delete this job?")) {
       try {
@@ -78,12 +80,20 @@ const AdminDashboard = () => {
     }
   };
 
+  const updateJob = async (id, updatedData) => {
+    try {
+      const { data } = await axios.put(`${API_BASE_URL}/job/${id}`, updatedData, { withCredentials: true });
+      setJobs(jobs.map((job) => (job._id === id ? data : job)));
+    } catch (error) {
+      console.error("Error updating job:", error.response?.data?.message);
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <h1>Admin Dashboard</h1>
       <h2>Welcome, {user?.name}!</h2>
 
-      {/* Users Section */}
       <h3>Users</h3>
       <table className="dashboard-table">
         <thead>
@@ -101,6 +111,7 @@ const AdminDashboard = () => {
               <td>{user.email}</td>
               <td>{user.phone}</td>
               <td>
+                <button className="update-btn" onClick={() => updateUser(user._id, { name: "Updated Name" })}>Update</button>
                 <button className="delete-btn" onClick={() => deleteUser(user._id)}>Delete</button>
               </td>
             </tr>
@@ -108,7 +119,6 @@ const AdminDashboard = () => {
         </tbody>
       </table>
 
-      {/* Job Posts Section */}
       <h3>Job Posts</h3>
       <table className="dashboard-table">
         <thead>
@@ -124,31 +134,9 @@ const AdminDashboard = () => {
               <td>{job.title}</td>
               <td>{job.company}</td>
               <td>
+                <button className="update-btn" onClick={() => updateJob(job._id, { title: "Updated Title" })}>Update</button>
                 <button className="delete-btn" onClick={() => deleteJob(job._id)}>Delete</button>
               </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Applications Section */}
-      <h3>Job Applications</h3>
-      <table className="dashboard-table">
-        <thead>
-          <tr>
-            <th>Applicant Name</th>
-            <th>Email</th>
-            <th>Job Title</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {applications.map((app) => (
-            <tr key={app._id}>
-              <td>{app.applicantName}</td>
-              <td>{app.email}</td>
-              <td>{app.jobTitle}</td>
-              <td>{app.status}</td>
             </tr>
           ))}
         </tbody>

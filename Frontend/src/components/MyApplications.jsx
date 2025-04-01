@@ -19,7 +19,7 @@ const MyApplications = () => {
 
   useEffect(() => {
     dispatch(fetchStudentApplications());
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     if (error) {
@@ -32,7 +32,11 @@ const MyApplications = () => {
       dispatch(fetchStudentApplications());
     }
   }, [dispatch, error, message]);
-
+  
+  useEffect(() => {
+    console.log("Applications state:", applications);
+  }, [applications]);
+  
   const handleDeleteApplication = (id) => {
     dispatch(deleteApplication(id));
   };
@@ -57,21 +61,21 @@ const MyApplications = () => {
                       <span>Job Title: </span> {element.jobInfo.jobTitle}
                     </p>
                     <p className="sub-sec">
-                      <span>Name</span> {element.StudentInfo.name}
+                      <span>Name</span> {element.studentInfo.name}
                     </p>
                     <p className="sub-sec">
-                      <span>Email</span> {element.StudentInfo.email}
+                      <span>Email</span> {element.studentInfo.email}
                     </p>
                     <p className="sub-sec">
-                      <span>Phone: </span> {element.StudentInfo.phone}
+                      <span>Phone: </span> {element.studentInfo.phone}
                     </p>
                     <p className="sub-sec">
-                      <span>Address: </span> {element.StudentInfo.address}
+                      <span>Address: </span> {element.studentInfo.address}
                     </p>
                     <p className="sub-sec">
                       <span>Coverletter: </span>
                       <textarea
-                        value={element.StudentInfo.coverLetter}
+                        value={element.studentInfo.coverLetter}
                         rows={5}
                         disabled
                       ></textarea>
@@ -85,8 +89,8 @@ const MyApplications = () => {
                       </button>
                       <Link
                         to={
-                          element.StudentInfo &&
-                          element.StudentInfo.resume.url
+                          element.studentInfo &&
+                          element.studentInfo.resume.url
                         }
                         className="btn"
                         target="_blank"

@@ -18,7 +18,7 @@ const Navbar = () => {
       <div className={`links ${show ? "active" : ""}`}>
         <ul>
           <li><Link to="/" onClick={() => setShow(false)}>HOME</Link></li>
-          <li><Link to="/jobs" onClick={() => setShow(false)}>JOBS</Link></li>
+          <li><Link to="/jobs" onClick={() => setShow(false)}>GIGS</Link></li>
           {isAuthenticated ? (
             <>
               <li><Link to="/dashboard" onClick={() => setShow(false)}>DASHBOARD</Link></li>

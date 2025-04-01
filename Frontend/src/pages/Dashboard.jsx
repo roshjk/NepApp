@@ -8,9 +8,9 @@ import MyProfile from "../components/MyProfile";
 import UpdateProfile from "../components/UpdateProfile";
 import UpdatePassword from "../components/UpdatePassword";
 import MyJobs from "../components/MyJobs";
-import JobPost from "../components/JobPost";
 import Applications from "../components/Applications";
 import MyApplications from "../components/MyApplications";
+import JobPost from "../components/PostJob";
 
 const Dashboard = () => {
   const [show, setShow] = useState(false);

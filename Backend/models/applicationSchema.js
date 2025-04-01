@@ -5,7 +5,7 @@ const applicationSchema = new mongoose.Schema({
   studentInfo: {
     id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",  // Reference to User model
+      ref: "User",  // Reference to User model (Student)
       required: true,
     },
     name: {
@@ -18,7 +18,7 @@ const applicationSchema = new mongoose.Schema({
       validate: [validator.isEmail, "Please provide a valid email."],
     },
     phone: {
-      type: Number,
+      type: String, // Changed from Number to String (to support different formats)
       required: true,
     },
     address: {
@@ -39,6 +39,7 @@ const applicationSchema = new mongoose.Schema({
       required: true,
     },
   },
+
   businessInfo: {
     id: {
       type: mongoose.Schema.Types.ObjectId,
@@ -51,6 +52,7 @@ const applicationSchema = new mongoose.Schema({
       required: true,
     },
   },
+
   jobInfo: {
     jobId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -61,16 +63,24 @@ const applicationSchema = new mongoose.Schema({
       type: String,
       required: true,
     },
+    category: { type: String }, // Matches Job Schema
+    price: { type: Number }, // Matches Job Schema
   },
+
   deletedBy: {
-    jobSeeker: {
-      type: Boolean,
-      default: false,
-    },
-    business: {
-      type: Boolean,
-      default: false,
-    },
+    student: { type: Boolean, default: false }, // Fixed field name
+    business: { type: Boolean, default: false },
+  },
+
+  status: {
+    type: String,
+    enum: ["pending", "accepted", "rejected"],
+    default: "pending",
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 

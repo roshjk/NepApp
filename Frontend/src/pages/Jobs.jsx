@@ -7,63 +7,25 @@ import { FaSearch } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const Jobs = () => {
-  const [city, setCity] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
-  const [niche, setNiche] = useState("");
-  const [selectedNiche, setSelectedNiche] = useState("");
+  const [category, setCategory] = useState("All");
   const [searchKeyword, setSearchKeyword] = useState("");
 
-  const { jobs, loading, error } = useSelector((state) => state.jobs);
-
-  const handleCityChange = (city) => {
-    setCity(city);
-    setSelectedCity(city);
-  };
-  const handleNicheChange = (niche) => {
-    setNiche(niche);
-    setSelectedNiche(niche);
-  };
-
   const dispatch = useDispatch();
+  const { jobs, loading, error } = useSelector((state) => state.jobs);
 
   useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch(clearAllJobErrors());
     }
-    dispatch(fetchJobs(city, niche, searchKeyword));
-  }, [dispatch, error, city, niche]);
+    dispatch(fetchJobs(category, searchKeyword));
+  }, [dispatch, error, category, searchKeyword]);
 
   const handleSearch = () => {
-    dispatch(fetchJobs(city, niche, searchKeyword));
+    dispatch(fetchJobs(category, searchKeyword));
   };
 
-  const cities = [
-    "All",
-    "Kathmandu",
-    "Pokhara",
-    "Lalitpur",
-    "Bhaktapur",
-    "Biratnagar",
-    "Birgunj",
-    "Dharan",
-    "Bharatpur",
-    "Janakpur",
-    "Butwal",
-    "Hetauda",
-    "Nepalgunj",
-    "Itahari",
-    "Dhangadhi",
-    "Siddharthanagar",
-    "Ghorahi",
-    "Tulsipur",
-    "Rajbiraj",
-    "Ilam",
-    "Bhadrapur",
-];
-
-
-  const nichesArray = [
+  const categories = [
     "All",
     "Software Development",
     "Web Development",
@@ -74,17 +36,6 @@ const Jobs = () => {
     "DevOps",
     "Mobile App Development",
     "Blockchain",
-    "Database Administration",
-    "Network Administration",
-    "UI/UX Design",
-    "Game Development",
-    "IoT (Internet of Things)",
-    "Big Data",
-    "Machine Learning",
-    "IT Project Management",
-    "IT Support and Helpdesk",
-    "Systems Administration",
-    "IT Consulting",
   ];
 
   return (
@@ -93,114 +44,68 @@ const Jobs = () => {
         <Spinner />
       ) : (
         <section className="jobs">
+          {/* Search Bar */}
           <div className="search-tab-wrapper">
             <input
               type="text"
+              placeholder="Search for jobs..."
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
             />
-            <button onClick={handleSearch}>Find Job</button>
-            <FaSearch />
+            <button onClick={handleSearch}>
+              <FaSearch />
+            </button>
           </div>
+
           <div className="wrapper">
+            {/* Filters */}
             <div className="filter-bar">
-              <div className="cities">
-                <h2>Filter Job By City</h2>
-                {cities.map((city, index) => (
-                  <>
-                  <div key={index}>
-                    <input
-                      type="radio"
-                      id={city}
-                      name="city"
-                      value={city}
-                      checked={selectedCity === city}
-                      onChange={() => handleCityChange(city)}
-                      />
-                    <label htmlFor={city}>{city}</label>
-                  </div>
-                      </>
-                ))}
-              </div>
-              <div className="cities">
-                <h2>Filter Job By Niche</h2>
-                {nichesArray.map((niche, index) => (
-                  <div key={index}>
-                    <input
-                      type="radio"
-                      id={niche}
-                      name="niche"
-                      value={niche}
-                      checked={selectedNiche === niche}
-                      onChange={() => handleNicheChange(niche)}
-                    />
-                    <label htmlFor={niche}>{niche}</label>
-                  </div>
-                ))}
-              </div>
+              <h3>Filter by Category</h3>
+              {categories.map((cat, index) => (
+                <div key={index} className="filter-option">
+                  <input
+                    type="radio"
+                    id={`cat-${index}`}
+                    name="category"
+                    value={cat}
+                    checked={category === cat}
+                    onChange={() => setCategory(cat)}
+                  />
+                  <label htmlFor={`cat-${index}`}>{cat}</label>
+                </div>
+              ))}
             </div>
+
+            {/* Job Listings */}
             <div className="container">
-              <div className="mobile-filter">
-                <select value={city} onChange={(e) => setCity(e.target.value)}>
-                  <option value="">Filter By City</option>
-                  {cities.map((city, index) => (
-                    <option value={city} key={index}>
-                      {city}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={niche}
-                  onChange={(e) => setNiche(e.target.value)}
-                >
-                  <option value="">Filter By Niche</option>
-                  {nichesArray.map((niche, index) => (
-                    <option value={niche} key={index}>
-                      {niche}
-                    </option>
-                  ))}
-                </select>
-              </div>
               <div className="jobs_container">
-                {jobs && jobs.length > 0 ? (jobs.map((element) => {
-                    return (
-                      <div className="card" key={element._id}>
-                        {element.hiringMultipleCandidates === "Yes" ? (
-                          <p className="hiring-multiple">
-                            Hiring Multiple Candidates
-                          </p>
-                        ) : (
-                          <p className="hiring">Hiring</p>
-                        )}
-                        <p className="title">{element.title}</p>
-                        <p className="company">{element.companyName}</p>
-                        <p className="location">{element.location}</p>
-                        <p className="salary">
-                          <span>Salary:</span> Rs. {element.salary}
-                        </p>
-                        <p className="posted">
-                          <span>Posted On:</span>{" "}
-                          {element.jobPostedOn.substring(0, 10)}
-                        </p>
-                        <div className="btn-wrapper">
-                          <Link
-                            className="btn"
-                            to={`/post/application/${element._id}`}
-                          >
-                            Apply Now
-                          </Link>
-                        </div>
+                {jobs && jobs.length > 0 ? (
+                  jobs.map((job) => (
+                    <div className="card" key={job._id}>
+                      <p className="title">{job.title}</p>
+                      <p className="category">{job.category}</p>
+                      <p className="price">
+                        <span>Price:</span> Rs. {job.price}
+                      </p>
+                      <p className="delivery">
+                        <span>Delivery Time:</span> {job.deliveryTime} days
+                      </p>
+                      <p className="status">
+                        <span>Status:</span> {job.status}
+                      </p>
+                      <div className="btn-wrapper">
+                        <Link className="btn" to={`/post/application/${job._id}`}>
+                          Apply Now
+                        </Link>
                       </div>
-                    );
-                  })) : (
-                  /************************************************************/
-                  <img src="./notfound.png" alt="job-not-found" style={{width: "100%"}}/>)
-                  /************************************************************/
-
-
-
-
-                  }
+                    </div>
+                  ))
+                ) : (
+                  <div className="no-jobs">
+                    <img src="/notfound.png" alt="No jobs found" />
+                    <p>No jobs found.</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

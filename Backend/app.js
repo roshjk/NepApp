@@ -10,10 +10,12 @@ import jobRouter from "./routes/jobRouter.js";
 import applicationRouter from "./routes/applicationRouter.js";
 import { newsLetterCron } from "./automation/newsLetterCron.js";
 import messageRouter from "./routes/messageRouter.js";  
- 
+
+
 
 import adminAuthRoutes from "./routes/adminAuth.js";
 import adminRoutes from "./routes/admin.js";
+
 const app = express();
 config({path:"./config/config.env"});
 
@@ -39,10 +41,13 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/job", jobRouter);
 app.use("/api/v1/application", applicationRouter);
 app.use("/api/v1/message",messageRouter);
-
+//app.use("api/v1/protfolio", protfolioRouter);
 
 app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin", adminRoutes);
+
+
+
 
 newsLetterCron()
 connection();

@@ -10,6 +10,8 @@ const jobSlice = createSlice({
     message: null,
     singleJob: {},
     myJobs: [],
+    appliedJobs: [], // New state to track jobs the user has applied for
+    reviews: [],     // New state to track reviews submitted by the user
   },
   reducers: {
     requestForAllJobs(state, action) {
@@ -92,6 +94,42 @@ const jobSlice = createSlice({
       state.error = null;
       state.jobs = state.jobs;
     },
+
+    requestForApplyJob(state) {
+      state.loading = true;
+      state.error = null;
+      state.message = null;
+    },
+    successForApplyJob(state, action) {
+      state.loading = false;
+      state.error = null;
+      state.message = "Applied successfully!";
+      state.appliedJobs.push(action.payload); // Add job to appliedJobs state
+    },
+    failureForApplyJob(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+      state.message = null;
+    },
+
+    // For handling the action of submitting a review
+    requestForSubmitReview(state) {
+      state.loading = true;
+      state.error = null;
+      state.message = null;
+    },
+    successForSubmitReview(state, action) {
+      state.loading = false;
+      state.error = null;
+      state.message = "Review submitted successfully!";
+      state.reviews.push(action.payload); // Add review to reviews state
+    },
+    failureForSubmitReview(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+      state.message = null;
+    },
+
     resetJobSlice(state, action) {
       state.error = null;
       state.jobs = state.jobs;
@@ -99,45 +137,52 @@ const jobSlice = createSlice({
       state.message = null;
       state.myJobs = state.myJobs;
       state.singleJob = {};
+      state.appliedJobs = [];  // Reset applied jobs
+      state.reviews = [];
     },
   },
 });
 
-export const fetchJobs =
-  (city, niche, searchKeyword = "") =>
-  async (dispatch) => {
+ 
+  
+  // ✅ Fetch All Jobs (with filtering)
+  export const fetchJobs =
+    (category = "", subCategory = "", status = "") =>
+    async (dispatch) => {
+      try {
+        dispatch(jobSlice.actions.requestForAllJobs());
+        let link = "http://localhost:4000/api/v1/job/all?";
+        let queryParams = [];
+  
+        if (category && category !== "All") queryParams.push(`category=${category}`);
+        if (subCategory && subCategory !== "All") queryParams.push(`subCategory=${subCategory}`);
+        if (status && status !== "All") queryParams.push(`status=${status}`);
+  
+       // if (queryParams.length) link += queryParams.join("&");
+        link += queryParams.join("&");
+        const response = await axios.get(link, { withCredentials: true });
+        dispatch(jobSlice.actions.successForAllJobs(response.data.jobs));
+        dispatch(jobSlice.actions.clearAllErrors());
+      } catch (error) {
+        dispatch(jobSlice.actions.failureForAllJobs(error.response?.data?.message || "Failed to fetch jobs"));
+      }
+    };
+  
+  // ✅ Fetch a Single Job by ID
+  export const fetchSingleJob = (jobId) => async (dispatch) => {
+    dispatch(jobSlice.actions.requestForSingleJob());
     try {
-      dispatch(jobSlice.actions.requestForAllJobs());
-      let link = "http://localhost:4000/api/v1/job/getall?";
-      let queryParams = [];
-
-      if (searchKeyword) queryParams.push(`searchKeyword=${searchKeyword}`);
-      if (city && city !== "All") queryParams.push(`city=${city}`);
-      if (niche && niche !== "All") queryParams.push(`niche=${niche}`);
-
-      link += queryParams.join("&");
-      const response = await axios.get(link, { withCredentials: true });
-      dispatch(jobSlice.actions.successForAllJobs(response.data.jobs));
+      const response = await axios.get(
+        `http://localhost:4000/api/v1/job/get/${jobId}`,
+        { withCredentials: true }
+      );
+      dispatch(jobSlice.actions.successForSingleJob(response.data.job));
       dispatch(jobSlice.actions.clearAllErrors());
     } catch (error) {
-      dispatch(jobSlice.actions.failureForAllJobs(error.response?.data?.message));
+      dispatch(jobSlice.actions.failureForSingleJob(error.response?.data?.message || "Failed to fetch job details"));
     }
   };
-
-
-export const fetchSingleJob = (jobId) => async (dispatch) => {
-  dispatch(jobSlice.actions.requestForSingleJob());
-  try {
-    const response = await axios.get(
-      `http://localhost:4000/api/v1/job/get/${jobId}`,
-      { withCredentials: true }
-    );
-    dispatch(jobSlice.actions.successForSingleJob(response.data.job));
-    dispatch(jobSlice.actions.clearAllErrors());
-  } catch (error) {
-    dispatch(jobSlice.actions.failureForSingleJob(error.response?.data?.message));
-  }
-};
+  
 
 export const postJob = (data) => async (dispatch) => {
   dispatch(jobSlice.actions.requestForPostJob());
@@ -189,5 +234,36 @@ export const clearAllJobErrors = () => (dispatch) => {
 export const resetJobSlice = () => (dispatch) => {
   dispatch(jobSlice.actions.resetJobSlice());
 };
+
+export const applyForJob = (jobId) => async (dispatch) => {
+  dispatch(jobSlice.actions.requestForApplyJob());
+  try {
+    const response = await axios.post(
+      `http://localhost:4000/api/v1/job/apply/${jobId}`,
+      {}, // Pass any necessary data in the body
+      { withCredentials: true }
+    );
+    // Once the application is successful, dispatch the success action
+    dispatch(jobSlice.actions.successForApplyJob(response.data.job));
+  } catch (error) {
+    dispatch(jobSlice.actions.failureForApplyJob(error.response?.data?.message));
+  }
+};
+
+export const submitReview = (jobId, rating, comment) => async (dispatch) => {
+  dispatch(jobSlice.actions.requestForSubmitReview());
+  try {
+    const response = await axios.post(
+      `http://localhost:4000/api/v1/job/review/${jobId}`,
+      { rating, comment },
+      { withCredentials: true }
+    );
+    // Once the review is successfully submitted, dispatch the success action
+    dispatch(jobSlice.actions.successForSubmitReview(response.data.review));
+  } catch (error) {
+    dispatch(jobSlice.actions.failureForSubmitReview(error.response?.data?.message));
+  }
+};
+
 
 export default jobSlice.reducer;

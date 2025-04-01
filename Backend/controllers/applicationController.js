@@ -4,12 +4,32 @@ import { Application } from "../models/applicationSchema.js";
 import { Job } from "../models/jobSchema.js";
 import { v2 as cloudinary } from "cloudinary";
 
+// ✅ Student applies for a job
 export const postApplication = catchAsyncErrors(async (req, res, next) => {
-  const { id } = req.params;
+  const { id } = req.params; // Job ID
   const { name, email, phone, address, coverLetter } = req.body;
+
   if (!name || !email || !phone || !address || !coverLetter) {
     return next(new ErrorHandler("All fields are required.", 400));
   }
+
+  // Fetch job details
+  const jobDetails = await Job.findById(id);
+  if (!jobDetails) {
+    return next(new ErrorHandler("Job not found.", 404));
+  }
+
+  // Check if already applied
+  const isAlreadyApplied = await Application.findOne({
+    "jobInfo.jobId": id,
+    "studentInfo.id": req.user._id,
+  });
+
+  if (isAlreadyApplied) {
+    return next(new ErrorHandler("You have already applied for this job.", 400));
+  }
+
+  // Prepare student info
   const studentInfo = {
     id: req.user._id,
     name,
@@ -19,33 +39,18 @@ export const postApplication = catchAsyncErrors(async (req, res, next) => {
     coverLetter,
     role: "Student",
   };
-  const jobDetails = await Job.findById(id);
-  if (!jobDetails) {
-    return next(new ErrorHandler("Job not found.", 404));
-  }
-  const isAlreadyApplied = await Application.findOne({
-    "jobInfo.jobId": id,
-    "studentInfo.id": req.user._id,
-  });
-  if (isAlreadyApplied) {
-    return next(
-      new ErrorHandler("You have already applied for this job.", 400)
-    );
-  }
+
+  // Resume Upload
   if (req.files && req.files.resume) {
-    const { resume } = req.files;
     try {
-      const cloudinaryResponse = await cloudinary.uploader.upload(
-        resume.tempFilePath,
-        {
-          folder: "Student_Resume",
-        }
-      );
+      const cloudinaryResponse = await cloudinary.uploader.upload(req.files.resume.tempFilePath, {
+        folder: "Student_Resume",
+      });
+
       if (!cloudinaryResponse || cloudinaryResponse.error) {
-        return next(
-          new ErrorHandler("Failed to upload resume to cloudinary.", 500)
-        );
+        return next(new ErrorHandler("Failed to upload resume to cloudinary.", 500));
       }
+
       studentInfo.resume = {
         public_id: cloudinaryResponse.public_id,
         url: cloudinaryResponse.secure_url,
@@ -53,93 +58,97 @@ export const postApplication = catchAsyncErrors(async (req, res, next) => {
     } catch (error) {
       return next(new ErrorHandler("Failed to upload resume", 500));
     }
-  } else {
-    if (req.user && !req.user.resume.url) {
-      return next(new ErrorHandler("Please upload your resume.", 400));
-    }
+  } else if (req.user && req.user.resume?.url) {
     studentInfo.resume = {
-      public_id: req.user && req.user.resume.public_id,
-      url: req.user && req.user.resume.url,
+      public_id: req.user.resume.public_id,
+      url: req.user.resume.url,
     };
+  } else {
+    return next(new ErrorHandler("Please upload your resume.", 400));
   }
+
+  // Prepare business info
   const businessInfo = {
     id: jobDetails.postedBy,
     role: "Business",
   };
+
+  // Prepare job info
   const jobInfo = {
     jobId: id,
     jobTitle: jobDetails.title,
+    category: jobDetails.category,
+    price: jobDetails.price,
   };
-  const application = await Application.create({
-    businessInfo,
-    studentInfo,
-    jobInfo,
-  });
+
+  // Create new application
+  const application = await Application.create({ businessInfo, studentInfo, jobInfo });
+
   res.status(201).json({
     success: true,
-    message: "Application submitted.",
+    message: "Application submitted successfully.",
     application,
   });
 });
 
-export const businessGetAllApplication = catchAsyncErrors(
-  async (req, res, next) => {
-    const { _id } = req.user;
-    const applications = await Application.find({
-      "businessInfo.id": _id,
-      "deletedBy.business": false,
-    });
-    res.status(200).json({
-      success: true,
-      applications,
-    });
-  }
-);
+// ✅ Business fetches all applications for their posted jobs
+export const businessGetAllApplication = catchAsyncErrors(async (req, res, next) => {
+  const { _id } = req.user;
 
-export const studentGetAllApplication = catchAsyncErrors(
-  async (req, res, next) => {
-    const { _id } = req.user;
-    const applications = await Application.find({
-      "studentInfo.id": _id,
-      "deletedBy.student": false,
-    });
-    res.status(200).json({
-      success: true,
-      applications,
-    });
-  }
-);
+  const applications = await Application.find({
+    "businessInfo.id": _id,
+    "deletedBy.business": false,
+  });
 
+  res.status(200).json({
+    success: true,
+    applications,
+  });
+});
+
+// ✅ Student fetches all their applications
+export const studentGetAllApplication = catchAsyncErrors(async (req, res, next) => {
+  const { _id } = req.user;
+
+  const applications = await Application.find({
+    "studentInfo.id": _id,
+    "deletedBy.student": false, // 🔥 Fixed the field name
+  });
+
+  res.status(200).json({
+    success: true,
+    applications,
+  });
+});
+
+// ✅ Delete application (soft delete)
 export const deleteApplication = catchAsyncErrors(async (req, res, next) => {
-  const { id } = req.params;
+  const { id } = req.params; // Application ID
   const application = await Application.findById(id);
+
   if (!application) {
     return next(new ErrorHandler("Application not found.", 404));
   }
-  const { role } = req.user;
-  switch (role) {
-    case "Student":
-      application.deletedBy.student = true;
-      await application.save();
-      break;
-    case "Business":
-      application.deletedBy.business = true;
-      await application.save();
-      break;
 
-    default:
-      console.log("Default case for application delete function.");
-      break;
+  const { role } = req.user;
+
+  if (role === "Student") {
+    application.deletedBy.student = true; // 🔥 Updated field name
+  } else if (role === "Business") {
+    application.deletedBy.business = true;
+  } else {
+    return next(new ErrorHandler("Unauthorized action.", 403));
   }
 
-  if (
-    application.deletedBy.business === true &&
-    application.deletedBy.student === true
-  ) {
+  await application.save();
+
+  // If both student and business delete the application, remove it from the database
+  if (application.deletedBy.business && application.deletedBy.student) {
     await application.deleteOne();
   }
+
   res.status(200).json({
     success: true,
-    message: "Application Deleted.",
+    message: "Application deleted successfully.",
   });
-}); 
+});
