@@ -32,11 +32,7 @@ const MyApplications = () => {
       dispatch(fetchStudentApplications());
     }
   }, [dispatch, error, message]);
-  
-  useEffect(() => {
-    console.log("Applications state:", applications);
-  }, [applications]);
-  
+
   const handleDeleteApplication = (id) => {
     dispatch(deleteApplication(id));
   };
@@ -45,65 +41,60 @@ const MyApplications = () => {
     <>
       {loading ? (
         <Spinner />
-      ) : applications && applications.length <= 0 ? (
+      ) : applications?.length === 0 ? (
         <h1 style={{ fontSize: "1.4rem", fontWeight: "600" }}>
           You have not applied for any job.
         </h1>
       ) : (
-        <>
-          <div className="account_components">
-            <h3>My Application For Jobs</h3>
-            <div className="applications_container">
-              {applications.map((element) => {
-                return (
-                  <div className="card" key={element._id}>
-                    <p className="sub-sec">
-                      <span>Job Title: </span> {element.jobInfo.jobTitle}
-                    </p>
-                    <p className="sub-sec">
-                      <span>Name</span> {element.studentInfo.name}
-                    </p>
-                    <p className="sub-sec">
-                      <span>Email</span> {element.studentInfo.email}
-                    </p>
-                    <p className="sub-sec">
-                      <span>Phone: </span> {element.studentInfo.phone}
-                    </p>
-                    <p className="sub-sec">
-                      <span>Address: </span> {element.studentInfo.address}
-                    </p>
-                    <p className="sub-sec">
-                      <span>Coverletter: </span>
-                      <textarea
-                        value={element.studentInfo.coverLetter}
-                        rows={5}
-                        disabled
-                      ></textarea>
-                    </p>
-                    <div className="btn-wrapper">
-                      <button
-                        className="outline_btn"
-                        onClick={() => handleDeleteApplication(element._id)}
-                      >
-                        Delete Application
-                      </button>
-                      <Link
-                        to={
-                          element.studentInfo &&
-                          element.studentInfo.resume.url
-                        }
-                        className="btn"
-                        target="_blank"
-                      >
-                        View Resume
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+        <div className="account_components">
+          <h3>My Applications For Jobs</h3>
+          <div className="applications_container">
+            {applications.map((application) => (
+              <div className="card" key={application._id}>
+                <p className="sub-sec">
+                  <span>Job Title: </span> {application.jobInfo.jobTitle}
+                </p>
+                <p className="sub-sec">
+                  <span>Name: </span> {application.studentInfo.name}
+                </p>
+                <p className="sub-sec">
+                  <span>Email: </span> {application.studentInfo.email}
+                </p>
+                <p className="sub-sec">
+                  <span>Phone: </span> {application.studentInfo.phone}
+                </p>
+                <p className="sub-sec">
+                  <span>Address: </span> {application.studentInfo.address}
+                </p>
+                <p className="sub-sec">
+                  <span>Cover Letter: </span>
+                  <textarea
+                    value={application.studentInfo.coverLetter}
+                    rows={5}
+                    disabled
+                  ></textarea>
+                </p>
+                <div className="btn-wrapper">
+                  <button
+                    className="outline_btn"
+                    onClick={() => handleDeleteApplication(application._id)}
+                  >
+                    Delete Application
+                  </button>
+                  {application.studentInfo?.resume?.url && (
+                    <Link
+                      to={application.studentInfo.resume.url}
+                      className="btn"
+                      target="_blank"
+                    >
+                      View Resume
+                    </Link>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-        </>
+        </div>
       )}
     </>
   );

@@ -1,117 +1,102 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-toastify";
-import { clearAllJobErrors, fetchJobs } from "../store/slices/jobSlice";
-import Spinner from "../components/Spinner";
-import { FaSearch } from "react-icons/fa";
-import { Link } from "react-router-dom";
-
+import { fetchJobs } from "../store/slices/jobSlice"; // Adjust path as necessary
+import JobCard from "../components/JobCard"; // Create a separate component to display each job
+import Pagination from "../components/Pagination"; // Create a pagination component
+import "./jobs.css"; // Add your CSS styles
 const Jobs = () => {
-  const [category, setCategory] = useState("All");
-  const [searchKeyword, setSearchKeyword] = useState("");
-
   const dispatch = useDispatch();
-  const { jobs, loading, error } = useSelector((state) => state.jobs);
+  const { jobs, loading, error, message } = useSelector((state) => state.jobs);
+  
+  const [searchKeyword, setSearchKeyword] = useState(""); // for searching jobs
+  const [category, setCategory] = useState(""); // filter by category
+  const [status, setStatus] = useState(""); // filter by status
+  const [page, setPage] = useState(1); // pagination
 
+  // Fetch jobs when component mounts or filters change
   useEffect(() => {
-    if (error) {
-      toast.error(error);
-      dispatch(clearAllJobErrors());
-    }
-    dispatch(fetchJobs(category, searchKeyword));
-  }, [dispatch, error, category, searchKeyword]);
+    const query = {
+      searchKeyword,
+      category,
+      status,
+    };
+    dispatch(fetchJobs(query, page, 10)); // Adjust pagination limit as needed
+  }, [dispatch, searchKeyword, category, status, page]);
 
-  const handleSearch = () => {
-    dispatch(fetchJobs(category, searchKeyword));
+  const handleSearch = (e) => {
+    setSearchKeyword(e.target.value);
   };
 
-  const categories = [
-    "All",
-    "Software Development",
-    "Web Development",
-    "Cybersecurity",
-    "Data Science",
-    "Artificial Intelligence",
-    "Cloud Computing",
-    "DevOps",
-    "Mobile App Development",
-    "Blockchain",
-  ];
+  const handleCategoryChange = (e) => {
+    setCategory(e.target.value);
+  };
+
+  const handleStatusChange = (e) => {
+    setStatus(e.target.value);
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
-    <>
-      {loading ? (
-        <Spinner />
-      ) : (
-        <section className="jobs">
-          {/* Search Bar */}
-          <div className="search-tab-wrapper">
-            <input
-              type="text"
-              placeholder="Search for jobs..."
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-            />
-            <button onClick={handleSearch}>
-              <FaSearch />
-            </button>
-          </div>
+    <div className="job-listing-page">
+      <h1>Job Listings</h1>
 
-          <div className="wrapper">
-            {/* Filters */}
-            <div className="filter-bar">
-              <h3>Filter by Category</h3>
-              {categories.map((cat, index) => (
-                <div key={index} className="filter-option">
-                  <input
-                    type="radio"
-                    id={`cat-${index}`}
-                    name="category"
-                    value={cat}
-                    checked={category === cat}
-                    onChange={() => setCategory(cat)}
-                  />
-                  <label htmlFor={`cat-${index}`}>{cat}</label>
-                </div>
-              ))}
-            </div>
+      {message && <div className="message">{message}</div>}
 
-            {/* Job Listings */}
-            <div className="container">
-              <div className="jobs_container">
-                {jobs && jobs.length > 0 ? (
-                  jobs.map((job) => (
-                    <div className="card" key={job._id}>
-                      <p className="title">{job.title}</p>
-                      <p className="category">{job.category}</p>
-                      <p className="price">
-                        <span>Price:</span> Rs. {job.price}
-                      </p>
-                      <p className="delivery">
-                        <span>Delivery Time:</span> {job.deliveryTime} days
-                      </p>
-                      <p className="status">
-                        <span>Status:</span> {job.status}
-                      </p>
-                      <div className="btn-wrapper">
-                        <Link className="btn" to={`/post/application/${job._id}`}>
-                          Apply Now
-                        </Link>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="no-jobs">
-                    <img src="/notfound.png" alt="No jobs found" />
-                    <p>No jobs found.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-    </>
+      {/* Filter Section */}
+      <div className="filters">
+        <input
+          type="text"
+          placeholder="Search Jobs"
+          value={searchKeyword}
+          onChange={handleSearch}
+        />
+        
+        <select onChange={handleCategoryChange} value={category}>
+          <option value="">Select Category</option>
+          <option value="IT">IT</option>
+          <option value="Design">Design</option>
+          <option value="Marketing">Marketing</option>
+          <option value="UI/UX">UI/UX</option>
+          <option value="Web Developement">Web Developement</option>
+          <option value="Graphic Designer">Graphic Designer</option>
+          {/* Add more categories as necessary */}
+        </select>
+
+        <select onChange={handleStatusChange} value={status}>
+          <option value="">Select Status</option>
+          <option value="open">Open</option>
+          <option value="closed">Closed</option>
+          <option value="in-progress">In Progress</option>
+        </select>
+      </div>
+
+      {/* Job Listings */}
+      <div className="job-list">
+        {jobs.length === 0 ? (
+          <div>No jobs available</div>
+        ) : (
+          jobs.map((job) => <JobCard key={job._id} job={job} />) // Create a JobCard component for displaying each job
+        )}
+      </div>
+
+      {/* Pagination */}
+      <Pagination
+        currentPage={page}
+        totalItems={jobs.length} // Adjust this according to the API response
+        onPageChange={handlePageChange}
+      />
+    </div>
   );
 };
 

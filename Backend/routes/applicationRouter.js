@@ -5,6 +5,7 @@ import {
   businessGetAllApplication,
   studentGetAllApplication,
   postApplication,
+ 
 } from "../controllers/applicationController.js";
 
 const router = express.Router();
@@ -33,5 +34,7 @@ router.delete(
   "/delete/:id",
   isAuthenticated,
   deleteApplication);
+
+  
 
 export default router;

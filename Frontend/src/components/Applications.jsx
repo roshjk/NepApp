@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import {
   clearAllApplicationErrors,
   deleteApplication,
-  fetchBusinessApplications,
+ 
   resetApplicationSlice,
 } from "../store/slices/applicationSlice";
 import Spinner from "./Spinner";
@@ -26,7 +26,6 @@ const Applications = () => {
       toast.success(message);
       dispatch(resetApplicationSlice());
     }
-    dispatch(fetchBusinessApplications());
   }, [dispatch, error, message]);
 
   const handleDeleteApplication = (id) => {

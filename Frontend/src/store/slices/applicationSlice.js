@@ -84,7 +84,7 @@ export const fetchBusinessApplications = () => async (dispatch) => {
   dispatch(applicationSlice.actions.requestForAllApplications());
   try {
     const response = await axios.get(
-      `http://localhost:4000/api/v1/application/Business/getall`,
+      `http://localhost:4000/api/v1/application/business/applications`,
       {
         withCredentials: true,
       }
@@ -108,7 +108,7 @@ export const fetchStudentApplications = () => async (dispatch) => {
   dispatch(applicationSlice.actions.requestForMyApplications());
   try {
     const response = await axios.get(
-      `http://localhost:4000/api/v1/application/Student/getall`,
+      `http://localhost:4000/api/v1/application/student/applications`,
       {
         withCredentials: true,
       }
@@ -132,7 +132,7 @@ export const postApplication = (data, jobId) => async (dispatch) => {
   dispatch(applicationSlice.actions.requestForPostApplication());
   try {
     const response = await axios.post(
-      `http://localhost:4000/api/v1/application/post/${jobId}`,
+      `http://localhost:4000/api/v1/application/apply/${jobId}`,
       data,
       {
         withCredentials: true,

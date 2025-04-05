@@ -10,24 +10,23 @@ const jobSlice = createSlice({
     message: null,
     singleJob: {},
     myJobs: [],
-    appliedJobs: [], // New state to track jobs the user has applied for
-    reviews: [],     // New state to track reviews submitted by the user
+    appliedJobs: [],
   },
   reducers: {
-    requestForAllJobs(state, action) {
+    requestForAllJobs(state) {
       state.loading = true;
       state.error = null;
     },
     successForAllJobs(state, action) {
       state.loading = false;
-      state.jobs = action.payload;
+      state.jobs = action.payload.jobs;
       state.error = null;
     },
     failureForAllJobs(state, action) {
       state.loading = false;
       state.error = action.payload;
     },
-    requestForSingleJob(state, action) {
+    requestForSingleJob(state) {
       state.message = null;
       state.error = null;
       state.loading = true;
@@ -35,30 +34,29 @@ const jobSlice = createSlice({
     successForSingleJob(state, action) {
       state.loading = false;
       state.error = null;
-      state.singleJob = action.payload;
+      state.singleJob = action.payload.job;
     },
     failureForSingleJob(state, action) {
-      state.singleJob = state.singleJob;
       state.error = action.payload;
       state.loading = false;
     },
-    requestForPostJob(state, action) {
+    requestForPostJob(state) {
       state.message = null;
       state.error = null;
       state.loading = true;
     },
     successForPostJob(state, action) {
-      state.message = action.payload;
+      state.message = action.payload.message;
       state.error = null;
       state.loading = false;
+      state.jobs.push(action.payload.job);
     },
     failureForPostJob(state, action) {
       state.message = null;
       state.error = action.payload;
       state.loading = false;
     },
-
-    requestForDeleteJob(state, action) {
+    requestForDeleteJob(state) {
       state.loading = true;
       state.error = null;
       state.message = null;
@@ -67,14 +65,14 @@ const jobSlice = createSlice({
       state.loading = false;
       state.error = null;
       state.message = action.payload;
+      state.myJobs = state.myJobs.filter(job => job._id !== action.payload.jobId);
     },
     failureForDeleteJob(state, action) {
       state.loading = false;
       state.error = action.payload;
       state.message = null;
     },
-
-    requestForMyJobs(state, action) {
+    requestForMyJobs(state) {
       state.loading = true;
       state.myJobs = [];
       state.error = null;
@@ -86,15 +84,8 @@ const jobSlice = createSlice({
     },
     failureForMyJobs(state, action) {
       state.loading = false;
-      state.myJobs = state.myJobs;
       state.error = action.payload;
     },
-
-    clearAllErrors(state, action) {
-      state.error = null;
-      state.jobs = state.jobs;
-    },
-
     requestForApplyJob(state) {
       state.loading = true;
       state.error = null;
@@ -103,167 +94,211 @@ const jobSlice = createSlice({
     successForApplyJob(state, action) {
       state.loading = false;
       state.error = null;
-      state.message = "Applied successfully!";
-      state.appliedJobs.push(action.payload); // Add job to appliedJobs state
+      state.message = action.payload.message;
+      state.appliedJobs.push(action.payload.jobId);
     },
     failureForApplyJob(state, action) {
       state.loading = false;
       state.error = action.payload;
       state.message = null;
     },
-
-    // For handling the action of submitting a review
-    requestForSubmitReview(state) {
+    assignJobRequest(state) {
       state.loading = true;
       state.error = null;
       state.message = null;
     },
-    successForSubmitReview(state, action) {
+    assignJobSuccess(state, action) {
       state.loading = false;
+      state.message = action.payload.message;
       state.error = null;
-      state.message = "Review submitted successfully!";
-      state.reviews.push(action.payload); // Add review to reviews state
     },
-    failureForSubmitReview(state, action) {
+    assignJobFailure(state, action) {
       state.loading = false;
+      state.message = null;
       state.error = action.payload;
-      state.message = null;
     },
-
-    resetJobSlice(state, action) {
+    
+    completeJobRequest(state) {
+      state.loading = true;
+      state.message = null;
       state.error = null;
-      state.jobs = state.jobs;
+    },
+    completeJobSuccess(state, action) {
+      state.loading = false;
+      state.message = action.payload.message;
+      state.error = null;
+    },
+    completeJobFailure(state, action) {
       state.loading = false;
       state.message = null;
-      state.myJobs = state.myJobs;
+      state.error = action.payload;
+    },
+    
+    reviewJobRequest(state) {
+      state.loading = true;
+      state.message = null;
+      state.error = null;
+    },
+    reviewJobSuccess(state, action) {
+      state.loading = false;
+      state.message = action.payload.message;
+      state.error = null;
+    },
+    reviewJobFailure(state, action) {
+      state.loading = false;
+      state.message = null;
+      state.error = action.payload;
+    },
+    
+    clearAllErrors(state) {
+      state.error = null;
+    },
+    resetJobSlice(state) {
+      state.error = null;
+      state.jobs = [];
+      state.loading = false;
+      state.message = null;
+      state.myJobs = [];
       state.singleJob = {};
-      state.appliedJobs = [];  // Reset applied jobs
-      state.reviews = [];
+      state.appliedJobs = [];
     },
   },
 });
 
- 
-  
-  // ✅ Fetch All Jobs (with filtering)
-  export const fetchJobs =
-    (category = "", subCategory = "", status = "") =>
-    async (dispatch) => {
-      try {
-        dispatch(jobSlice.actions.requestForAllJobs());
-        let link = "http://localhost:4000/api/v1/job/all?";
-        let queryParams = [];
-  
-        if (category && category !== "All") queryParams.push(`category=${category}`);
-        if (subCategory && subCategory !== "All") queryParams.push(`subCategory=${subCategory}`);
-        if (status && status !== "All") queryParams.push(`status=${status}`);
-  
-       // if (queryParams.length) link += queryParams.join("&");
-        link += queryParams.join("&");
-        const response = await axios.get(link, { withCredentials: true });
-        dispatch(jobSlice.actions.successForAllJobs(response.data.jobs));
-        dispatch(jobSlice.actions.clearAllErrors());
-      } catch (error) {
-        dispatch(jobSlice.actions.failureForAllJobs(error.response?.data?.message || "Failed to fetch jobs"));
-      }
-    };
-  
-  // ✅ Fetch a Single Job by ID
-  export const fetchSingleJob = (jobId) => async (dispatch) => {
-    dispatch(jobSlice.actions.requestForSingleJob());
-    try {
-      const response = await axios.get(
-        `http://localhost:4000/api/v1/job/get/${jobId}`,
-        { withCredentials: true }
-      );
-      dispatch(jobSlice.actions.successForSingleJob(response.data.job));
-      dispatch(jobSlice.actions.clearAllErrors());
-    } catch (error) {
-      dispatch(jobSlice.actions.failureForSingleJob(error.response?.data?.message || "Failed to fetch job details"));
-    }
-  };
-  
+export const fetchJobs = (query = {}) => async (dispatch) => {
+  try {
+    dispatch(jobSlice.actions.requestForAllJobs());
+    const response = await axios.get("http://localhost:4000/api/v1/job/all", {
+      params: query,
+      withCredentials: true,
+    });
+    dispatch(jobSlice.actions.successForAllJobs(response.data));
+  } catch (error) {
+    dispatch(jobSlice.actions.failureForAllJobs(error.response?.data?.message || "Failed to fetch jobs"));
+  }
+};
+
+export const fetchSingleJob = (jobId) => async (dispatch) => {
+  dispatch(jobSlice.actions.requestForSingleJob());
+  try {
+    const response = await axios.get(`http://localhost:4000/api/v1/job/${jobId}`, {
+      withCredentials: true,
+    });
+    dispatch(jobSlice.actions.successForSingleJob(response.data));
+  } catch (error) {
+    dispatch(jobSlice.actions.failureForSingleJob(error.response?.data?.message || "Failed to fetch job"));
+  }
+};
 
 export const postJob = (data) => async (dispatch) => {
   dispatch(jobSlice.actions.requestForPostJob());
   try {
     const response = await axios.post(
-      `http://localhost:4000/api/v1/job/post`,
+      "http://localhost:4000/api/v1/job/post",
       data,
-      { withCredentials: true, headers: { "Content-Type": "application/json" } }
+      { withCredentials: true, headers: { "Content-Type":  "multipart/form-data" } }
     );
-    dispatch(jobSlice.actions.successForPostJob(response.data.message));
-    dispatch(jobSlice.actions.clearAllErrors());
+    dispatch(jobSlice.actions.successForPostJob(response.data));
   } catch (error) {
     dispatch(jobSlice.actions.failureForPostJob(error.response?.data?.message));
   }
 };
 
-export const getMyJobs = () => async (dispatch) => {
-  dispatch(jobSlice.actions.requestForMyJobs());
+export const updateJob = (jobId, data) => async (dispatch) => {
+  dispatch(jobSlice.actions.requestForPostJob());
   try {
-    const response = await axios.get(
-      `http://localhost:4000/api/v1/job/getmyjobs`,
-      { withCredentials: true }
+    const response = await axios.put(
+      `http://localhost:4000/api/v1/job/${jobId}`,
+      data,
+      { withCredentials: true, headers: { "Content-Type": "application/json" } }
     );
-    dispatch(jobSlice.actions.successForMyJobs(response.data.myJobs));
-    dispatch(jobSlice.actions.clearAllErrors());
+    dispatch(jobSlice.actions.successForPostJob({ message: "Job updated successfully", job: response.data.updatedJob }));
   } catch (error) {
-    dispatch(jobSlice.actions.failureForMyJobs(error.response?.data?.message));
+    dispatch(jobSlice.actions.failureForPostJob(error.response?.data?.message));
   }
 };
 
 export const deleteJob = (id) => async (dispatch) => {
   dispatch(jobSlice.actions.requestForDeleteJob());
   try {
-    const response = await axios.delete(
-      `http://localhost:4000/api/v1/job/delete/${id}`,
-      { withCredentials: true }
-    );
-    dispatch(jobSlice.actions.successForDeleteJob(response.data.message));
-    dispatch(clearAllJobErrors());
+    const response = await axios.delete(`http://localhost:4000/api/v1/job/${id}`, {
+      withCredentials: true,
+    });
+    dispatch(jobSlice.actions.successForDeleteJob({ ...response.data, jobId: id }));
   } catch (error) {
     dispatch(jobSlice.actions.failureForDeleteJob(error.response?.data?.message));
   }
 };
 
-export const clearAllJobErrors = () => (dispatch) => {
-  dispatch(jobSlice.actions.clearAllErrors());
-};
-
-export const resetJobSlice = () => (dispatch) => {
-  dispatch(jobSlice.actions.resetJobSlice());
+export const getMyJobs = () => async (dispatch) => {
+  dispatch(jobSlice.actions.requestForMyJobs());
+  try {
+    const response = await axios.get("http://localhost:4000/api/v1/job/all", {
+      params: { myJobs: true }, // Assuming backend filters by user
+      withCredentials: true,
+    });
+    dispatch(jobSlice.actions.successForMyJobs(response.data.jobs));
+  } catch (error) {
+    dispatch(jobSlice.actions.failureForMyJobs(error.response?.data?.message));
+  }
 };
 
 export const applyForJob = (jobId) => async (dispatch) => {
   dispatch(jobSlice.actions.requestForApplyJob());
   try {
     const response = await axios.post(
-      `http://localhost:4000/api/v1/job/apply/${jobId}`,
-      {}, // Pass any necessary data in the body
+      "http://localhost:4000/api/v1/job/apply",
+      { jobId },
       { withCredentials: true }
     );
-    // Once the application is successful, dispatch the success action
-    dispatch(jobSlice.actions.successForApplyJob(response.data.job));
+    dispatch(jobSlice.actions.successForApplyJob({ ...response.data, jobId }));
   } catch (error) {
     dispatch(jobSlice.actions.failureForApplyJob(error.response?.data?.message));
   }
 };
 
-export const submitReview = (jobId, rating, comment) => async (dispatch) => {
-  dispatch(jobSlice.actions.requestForSubmitReview());
+export const assignJob = (jobId, studentId) => async (dispatch) => {
+  dispatch(jobSlice.actions.assignJobRequest());
   try {
-    const response = await axios.post(
-      `http://localhost:4000/api/v1/job/review/${jobId}`,
-      { rating, comment },
+    const response = await axios.put(
+      `http://localhost:4000/api/v1/job/${jobId}/assign`,
+      { studentId },
       { withCredentials: true }
     );
-    // Once the review is successfully submitted, dispatch the success action
-    dispatch(jobSlice.actions.successForSubmitReview(response.data.review));
+    dispatch(jobSlice.actions.assignJobSuccess(response.data));
   } catch (error) {
-    dispatch(jobSlice.actions.failureForSubmitReview(error.response?.data?.message));
+    dispatch(jobSlice.actions.assignJobFailure(error.response?.data?.message));
+  }
+};
+
+export const completeJob = (jobId) => async (dispatch) => {
+  dispatch(jobSlice.actions.completeJobRequest());
+  try {
+    const response = await axios.put(
+      `http://localhost:4000/api/v1/job/${jobId}/complete`,
+      {},
+      { withCredentials: true }
+    );
+    dispatch(jobSlice.actions.completeJobSuccess(response.data));
+  } catch (error) {
+    dispatch(jobSlice.actions.completeJobFailure(error.response?.data?.message));
+  }
+};
+
+export const submitReview = (jobId, reviewData) => async (dispatch) => {
+  dispatch(jobSlice.actions.reviewJobRequest());
+  try {
+    const response = await axios.post(
+      `http://localhost:4000/api/v1/job/${jobId}/review`,
+      reviewData,
+      { withCredentials: true }
+    );
+    dispatch(jobSlice.actions.reviewJobSuccess(response.data));
+  } catch (error) {
+    dispatch(jobSlice.actions.reviewJobFailure(error.response?.data?.message));
   }
 };
 
 
+export const { clearAllErrors, resetJobSlice } = jobSlice.actions;
 export default jobSlice.reducer;

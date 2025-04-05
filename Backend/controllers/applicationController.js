@@ -4,7 +4,7 @@ import { Application } from "../models/applicationSchema.js";
 import { Job } from "../models/jobSchema.js";
 import { v2 as cloudinary } from "cloudinary";
 
-// ✅ Student applies for a job
+
 export const postApplication = catchAsyncErrors(async (req, res, next) => {
   const { id } = req.params; // Job ID
   const { name, email, phone, address, coverLetter } = req.body;
@@ -40,32 +40,32 @@ export const postApplication = catchAsyncErrors(async (req, res, next) => {
     role: "Student",
   };
 
-  // Resume Upload
-  if (req.files && req.files.resume) {
-    try {
-      const cloudinaryResponse = await cloudinary.uploader.upload(req.files.resume.tempFilePath, {
-        folder: "Student_Resume",
-      });
+// Resume Upload
+if (req.files && req.files.resume) {
+  try {
+    const cloudinaryResponse = await cloudinary.uploader.upload(req.files.resume.tempFilePath, {
+      folder: "Student_Resume",
+    });
 
-      if (!cloudinaryResponse || cloudinaryResponse.error) {
-        return next(new ErrorHandler("Failed to upload resume to cloudinary.", 500));
-      }
-
-      studentInfo.resume = {
-        public_id: cloudinaryResponse.public_id,
-        url: cloudinaryResponse.secure_url,
-      };
-    } catch (error) {
-      return next(new ErrorHandler("Failed to upload resume", 500));
+    if (!cloudinaryResponse || cloudinaryResponse.error) {
+      return next(new ErrorHandler("Failed to upload resume to cloudinary.", 500));
     }
-  } else if (req.user && req.user.resume?.url) {
+
     studentInfo.resume = {
-      public_id: req.user.resume.public_id,
-      url: req.user.resume.url,
+      public_id: cloudinaryResponse.public_id,
+      url: cloudinaryResponse.secure_url,
     };
-  } else {
-    return next(new ErrorHandler("Please upload your resume.", 400));
+  } catch (error) {
+    return next(new ErrorHandler("Failed to upload resume", 500));
   }
+} else if (req.user && req.user.resume?.url) {
+  studentInfo.resume = {
+    public_id: req.user.resume.public_id,
+    url: req.user.resume.url,
+  };
+} else {
+  return next(new ErrorHandler("Please upload your resume.", 400));
+}
 
   // Prepare business info
   const businessInfo = {
@@ -75,10 +75,15 @@ export const postApplication = catchAsyncErrors(async (req, res, next) => {
 
   // Prepare job info
   const jobInfo = {
-    jobId: id,
+    jobId: jobDetails._id,
     jobTitle: jobDetails.title,
     category: jobDetails.category,
+    subCategory: jobDetails.subCategory,
+    tags: jobDetails.tags?.split(",").map(tag => tag.trim()), // Assuming tags is a string in job model
     price: jobDetails.price,
+    deliveryTime: jobDetails.deliveryTime,
+    revisions: jobDetails.revisions,
+    jobThumbnail: jobDetails.jobThumbnail,
   };
 
   // Create new application
@@ -90,6 +95,7 @@ export const postApplication = catchAsyncErrors(async (req, res, next) => {
     application,
   });
 });
+
 
 // ✅ Business fetches all applications for their posted jobs
 export const businessGetAllApplication = catchAsyncErrors(async (req, res, next) => {
@@ -151,4 +157,6 @@ export const deleteApplication = catchAsyncErrors(async (req, res, next) => {
     success: true,
     message: "Application deleted successfully.",
   });
+
+  
 });

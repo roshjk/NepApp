@@ -17,6 +17,7 @@ import { getUser } from "./store/slices/userSlice";
 import Chat from "./pages/Chat";
 import AdminDashboard from "./pages/AdminDashboard";
 
+
 // Create a wrapper component to use the useLocation hook
 const AppContent = () => {
   const dispatch = useDispatch();
@@ -36,11 +37,13 @@ const AppContent = () => {
         <Route path="/" element={<Home />} />
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/post/application/:jobId" element={<PostApplication />} />
+        <Route path="/apply/:jobId" element={<PostApplication />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="*" element={<NotFound />} />
+        
+
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
       </Routes>
       {!isAdminDashboard && <Footer />} {/* Conditionally render the Footer */}

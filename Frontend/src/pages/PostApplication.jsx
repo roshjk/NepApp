@@ -154,97 +154,18 @@ const PostApplication = () => {
         </form>
 
         <div className="job-details">
-          <header>
-            <h3>{singleJob.title}</h3>
-            {singleJob.personalWebsite && (
-              <Link target="_blank" to={singleJob.personalWebsite.url}>
-                {singleJob.personalWebsite.title}
-              </Link>
-            )}
-            <p>{singleJob.location}</p>
-            <p>Rs. {singleJob.salary} a month</p>
-          </header>
-          <hr />
-          <section>
-            <div className="wrapper">
-              <h3>Job details</h3>
-              <div>
-                <IoMdCash />
-                <div>
-                  <span>Pay</span>
-                  <span>{singleJob.salary} a month</span>
-                </div>
-              </div>
-              <div>
-                <FaToolbox />
-                <div>
-                  <span>Job type</span>
-                  <span>{singleJob.jobType}</span>
-                </div>
-              </div>
-            </div>
-            <hr />
-            <div className="wrapper">
-              <h3>Location</h3>
-              <div className="location-wrapper">
-                <FaLocationDot />
-                <span>{singleJob.location}</span>
-              </div>
-            </div>
-            <hr />
-            <div className="wrapper">
-              <h3>Full Job Description</h3>
-              <p>{singleJob.introduction}</p>
-              {singleJob.qualifications && (
-                <div>
-                  <h4>Qualifications</h4>
-                  <ul>
-                    {qualifications.map((element) => {
-                      return (
-                        <li key={element} style={{ listStyle: "inside" }}>
-                          {element}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
-              {singleJob.responsibilities && (
-                <div>
-                  <h4>Responsibilities</h4>
-                  <ul>
-                    {responsibilities.map((element) => {
-                      return (
-                        <li key={element} style={{ listStyle: "inside" }}>
-                          {element}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
-              {singleJob.offers && (
-                <div>
-                  <h4>Offering</h4>
-                  <ul>
-                    {offering.map((element) => {
-                      return (
-                        <li key={element} style={{ listStyle: "inside" }}>
-                          {element}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </section>
-          <hr />
-          <footer>
-            <h3>Job Niche</h3>
-            <p>{singleJob.jobNiche}</p>
-          </footer>
-        </div>
+            <header>
+        <h3>{singleJob.jobTitle}</h3>
+        {singleJob.personalWebsite && (
+      <Link target="_blank" to={singleJob.personalWebsite.url}>
+        {singleJob.personalWebsite.title}
+      </Link>
+    )}
+   <span>Pay</span>
+   <span>{singleJob.price}</span>
+    <p> {singleJob.category}</p>
+  </header>
+  </div>   
       </article>
     </>
   );
