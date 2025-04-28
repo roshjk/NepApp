@@ -5,7 +5,12 @@ import {
   businessGetAllApplication,
   studentGetAllApplication,
   postApplication,
- 
+  updateApplicationStatus,
+  submitWork,
+  initiatePayment,
+  verifyAndReleasePayment,
+  adminGetAllApplications,
+
 } from "../controllers/applicationController.js";
 
 const router = express.Router();
@@ -24,6 +29,10 @@ router.get(
   businessGetAllApplication
 );
 
+router.get("/applications",
+   isAuthenticated,
+   isAuthorized("Admin"),
+ adminGetAllApplications);
 router.get(
   "/student/applications",
   isAuthenticated,
@@ -35,6 +44,27 @@ router.delete(
   isAuthenticated,
   deleteApplication);
 
-  
+router.put(
+  "/update-status/:applicationId",
+   updateApplicationStatus);
+
+   router.put(
+    "/submit-work/:applicationId",
+    isAuthenticated,
+    isAuthorized("Student"),
+    submitWork);
+
+   router.put(
+    "/verify-and-release/:applicationId",
+     isAuthenticated,
+     isAuthorized("Admin"),
+     verifyAndReleasePayment); 
+     
+     router.put(
+      "/initiate-payment/:applicationId",
+      isAuthenticated,
+      isAuthorized("Business"),
+      initiatePayment
+    ); 
 
 export default router;

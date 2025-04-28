@@ -1,70 +1,76 @@
+import { Message } from "../models/messageSchema.js";
 import { User } from "../models/userSchema.js";
-import Message from "../models/messageSchema.js";
 
-import cloudinary from "cloudinary";
-import { getReceiverSocketId, io } from "../lib/socket.js";
-
-export const getUsersForSidebar = async (req, res) => {
-  try {
-    const loggedInUserId = req.user._id;
-    const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-password");
-
-    res.status(200).json(filteredUsers);
-  } catch (error) {
-    console.error("Error in getUsersForSidebar: ", error.message);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-export const getMessages = async (req, res) => {
-  try {
-    const { id: userToChatId } = req.params;
-    const myId = req.user._id;
-
-    const messages = await Message.find({
-      $or: [
-        { senderId: myId, receiverId: userToChatId },
-        { senderId: userToChatId, receiverId: myId },
-      ],
-    });
-
-    res.status(200).json(messages);
-  } catch (error) {
-    console.log("Error in getMessages controller: ", error.message);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
+// ✅ Send a Message
 export const sendMessage = async (req, res) => {
+  const { receiver, text } = req.body;
+
+  if (!receiver || !text) {
+    return res.status(400).json({ message: "Receiver and message text are required." });
+  }
+
+  const message = await Message.create({
+    sender: req.user._id,
+    receiver,
+    text,
+  });
+
+  res.status(201).json({ success: true, message });
+};
+
+// ✅ Get Conversation with a Specific User
+export const getConversation = async (req, res) => {
+  const { userId } = req.params;
+
+  const messages = await Message.find({
+    $or: [
+      { sender: req.user._id, receiver: userId },
+      { sender: userId, receiver: req.user._id },
+    ],
+  })
+    .sort({ createdAt: 1 })
+    .populate("sender", "name")
+    .populate("receiver", "name");
+
+  res.status(200).json({ success: true, messages });
+};
+
+// ✅ Get All Past Conversations for Sidebar
+export const getAllConversations = async (req, res) => {
   try {
-    const { text, image } = req.body;
-    const { id: receiverId } = req.params;
-    const senderId = req.user._id;
+    const messages = await Message.find({
+      $or: [{ sender: req.user._id }, { receiver: req.user._id }],
+    })
+      .sort({ updatedAt: -1 }) // newest message first
+      .populate("sender receiver", "name");
 
-    let imageUrl;
-    if (image) {
-      // Upload base64 image to cloudinary
-      const uploadResponse = await cloudinary.uploader.upload(image);
-      imageUrl = uploadResponse.secure_url;
-    }
+    const uniqueUsers = {};
 
-    const newMessage = new Message({
-      senderId,
-      receiverId,
-      text,
-      image: imageUrl,
+    messages.forEach((msg) => {
+      const otherUser = msg.sender._id.equals(req.user._id)
+        ? msg.receiver
+        : msg.sender;
+
+      // Keep only the latest message
+      if (
+        !uniqueUsers[otherUser._id] ||
+        new Date(msg.updatedAt) > new Date(uniqueUsers[otherUser._id].updatedAt)
+      ) {
+        uniqueUsers[otherUser._id] = {
+          user: otherUser,
+          lastMessage: msg.text,
+          updatedAt: msg.updatedAt,
+        };
+      }
     });
 
-    await newMessage.save();
+    const conversations = Object.values(uniqueUsers);
 
-    const receiverSocketId = getReceiverSocketId(receiverId);
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit("newMessage", newMessage);
-    }
-
-    res.status(201).json(newMessage);
+    res.status(200).json({ success: true, conversations });
   } catch (error) {
-    console.log("Error in sendMessage controller: ", error.message);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({
+      message: "Failed to fetch conversations",
+      error: error.message,
+    });
   }
 };

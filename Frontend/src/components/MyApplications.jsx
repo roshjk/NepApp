@@ -1,21 +1,22 @@
-import React, { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
+  fetchStudentApplications,
+  deleteApplication,
+  submitWork,
   clearAllApplicationErrors,
   resetApplicationSlice,
-  deleteApplication,
-  fetchStudentApplications,
 } from "../store/slices/applicationSlice";
-import Spinner from "../components/Spinner";
-
+import { toast } from "react-toastify";
+import Spinner from "./Spinner";
+import { Link } from "react-router-dom";
+import "./MyApplication.css"
 const MyApplications = () => {
-  const { user, isAuthenticated } = useSelector((state) => state.user);
-  const { loading, error, applications, message } = useSelector(
-    (state) => state.applications
-  );
   const dispatch = useDispatch();
+  const { applications, loading, error, message } = useSelector((state) => state.applications);
+
+  const [workText, setWorkText] = useState({});
+  const [submittingId, setSubmittingId] = useState(null);
 
   useEffect(() => {
     dispatch(fetchStudentApplications());
@@ -26,77 +27,105 @@ const MyApplications = () => {
       toast.error(error);
       dispatch(clearAllApplicationErrors());
     }
+
     if (message) {
       toast.success(message);
       dispatch(resetApplicationSlice());
-      dispatch(fetchStudentApplications());
     }
-  }, [dispatch, error, message]);
+  }, [error, message, dispatch]);
 
-  const handleDeleteApplication = (id) => {
+  const handleDelete = (id) => {
     dispatch(deleteApplication(id));
   };
 
-  return (
-    <>
-      {loading ? (
-        <Spinner />
-      ) : applications?.length === 0 ? (
-        <h1 style={{ fontSize: "1.4rem", fontWeight: "600" }}>
-          You have not applied for any job.
-        </h1>
+  const handleSubmitWork = (id) => {
+    const text = workText[id];
+    if (!text || text.trim().length < 5) {
+      toast.error("Please enter a valid work submission.");
+      return;
+    }
+
+    setSubmittingId(id);
+    dispatch(submitWork(id, text)).finally(() => {
+      setSubmittingId(null);
+    });
+  };
+
+  return loading ? (
+    <Spinner />
+  ) : (
+    <section className="account_components">
+      <h3>My Job Applications</h3>
+
+      {!applications?.length ? (
+        <p>You haven’t applied to any jobs yet.</p>
       ) : (
-        <div className="account_components">
-          <h3>My Applications For Jobs</h3>
-          <div className="applications_container">
-            {applications.map((application) => (
-              <div className="card" key={application._id}>
-                <p className="sub-sec">
-                  <span>Job Title: </span> {application.jobInfo.jobTitle}
-                </p>
-                <p className="sub-sec">
-                  <span>Name: </span> {application.studentInfo.name}
-                </p>
-                <p className="sub-sec">
-                  <span>Email: </span> {application.studentInfo.email}
-                </p>
-                <p className="sub-sec">
-                  <span>Phone: </span> {application.studentInfo.phone}
-                </p>
-                <p className="sub-sec">
-                  <span>Address: </span> {application.studentInfo.address}
-                </p>
-                <p className="sub-sec">
-                  <span>Cover Letter: </span>
-                  <textarea
-                    value={application.studentInfo.coverLetter}
-                    rows={5}
-                    disabled
-                  ></textarea>
-                </p>
-                <div className="btn-wrapper">
-                  <button
-                    className="outline_btn"
-                    onClick={() => handleDeleteApplication(application._id)}
-                  >
-                    Delete Application
-                  </button>
-                  {application.studentInfo?.resume?.url && (
-                    <Link
-                      to={application.studentInfo.resume.url}
+        <div className="applications_container">
+          {applications.map((app) => (
+            <div key={app._id} className="card">
+              <p><strong>Job Title:</strong> {app.jobInfo?.title}</p>
+              <p><strong>Category:</strong> {app.jobInfo?.category}</p>
+              <p><strong>Price:</strong> ₹{app.jobInfo?.price}</p>
+              <p><strong>Delivery Time:</strong> {app.jobInfo?.deliveryTime} days</p>
+              <p><strong>Revisions:</strong> {app.jobInfo?.revisions}</p>
+
+              <p><strong>Business Name:</strong> {app.businessInfo?.name}</p>
+              <p><strong>Business Email:</strong> {app.businessInfo?.email}</p>
+
+              <p><strong>Status:</strong> {app.status}</p>
+              <p><strong>Submission Status:</strong> {app.submissionStatus}</p>
+              <p><strong>Payment Status:</strong> {app.paymentStatus}</p>
+
+              <p><strong>Cover Letter:</strong></p>
+              <textarea value={app.coverLetter} rows={4} disabled style={{ width: "100%" }} />
+
+              {/* Submitted Work Display */}
+              {app.submittedWork && (
+                <>
+                  <p><strong>Submitted Work:</strong></p>
+                  <textarea value={app.submittedWork} disabled rows={3} style={{ width: "100%" }} />
+                </>
+              )}
+
+              {/* Conditional Submit Work Section */}
+              {app.status === "accepted" &&
+                app.paymentStatus === "pending" &&
+                app.submissionStatus === "none" && (
+                  <>
+                    <p><strong>Submit Your Work:</strong></p>
+                    <textarea
+                      rows={3}
+                      placeholder="Enter your work link or details here..."
+                      value={workText[app._id] || ""}
+                      onChange={(e) =>
+                        setWorkText({ ...workText, [app._id]: e.target.value })
+                      }
+                      style={{ width: "100%" }}
+                    />
+                    <button
                       className="btn"
-                      target="_blank"
+                      onClick={() => handleSubmitWork(app._id)}
+                      disabled={submittingId === app._id}
                     >
-                      View Resume
-                    </Link>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+                      {submittingId === app._id ? "Submitting..." : "Submit Work"}
+                    </button>
+                  </>
+              )}
+
+              {app.resumeUrl && (
+                <Link to={app.resumeUrl} className="btn" target="_blank">
+                  View Resume (PDF)
+                </Link>
+              )}
+
+              <button className="outline_btn" onClick={() => handleDelete(app._id)}>
+                Delete Application
+              </button>
+            </div>
+          ))}
         </div>
       )}
-    </>
+    </section>
   );
 };
 

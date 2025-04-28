@@ -1,64 +1,67 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import {
-  FaSquareXTwitter,
-  FaSquareInstagram,
-  FaYoutube,
-  FaLinkedin,
-} from "react-icons/fa6";
-import "./Home.css"; // CSS file for the home page
+import { Link } from "react-router-dom";
+import "./Home.css"; // Update CSS based on layout
 
-// Hero Component
-const Hero = () => {
-  return (
-    <section className="hero">
-      <h1>Launch Your Freelance Career Today</h1>
-      <h4>
-        Discover Projects, Connect with Clients, and Build Your Portfolio with Ease
-      </h4>
-      <div className="box">
-        Join a thriving community of freelancers. Find opportunities in design, development, writing, and more. Your next gig is just a click away—start now!
-        <Link to="/signup" className="cta-button">
-          Get Started
-        </Link>
-      </div>
-    </section>
-  );
-};
-
-// Services Component
-const Services = () => {
-  return (
-    <section className="services">
-      <h2>Our Services</h2>
-      <div className="services-grid">
-        <div className="service-card">
-          <h3>Find Gigs</h3>
-          <p>Browse thousands of freelance projects tailored to your skills.</p>
-        </div>
-        <div className="service-card">
-          <h3>Showcase Work</h3>
-          <p>Create a stunning portfolio to attract clients.</p>
-        </div>
-        <div className="service-card">
-          <h3>Get Paid</h3>
-          <p>Secure payments with our trusted escrow system.</p>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-
-
-// Main Home Component
 const Home = () => {
+  const { isAuthenticated } = useSelector((state) => state.user);
+
+  if (isAuthenticated) return null; // Only show for unauthenticated users
+
   return (
-    <div className="home">
-      <Hero />
-      <Services />
-   
+    <div className="homepage">
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-left">
+          <h1>Connect Students<br />with Business Opportunities</h1>
+          <p>Find part-time jobs and project-based work that fits your schedule and skills.</p>
+          <div className="cta-buttons">
+            <Link to="/register/student" className="btn student">I'm a Student</Link>
+            <Link to="/register/business" className="btn business">I'm a Business</Link>
+          </div>
+        </div>
+        <div className="hero-right">
+          <img src="/images/landing-illustration.png" alt="Students and Business" />
+        </div>
+      </section>
+
+      {/* How NepApp Works */}
+      <section className="how-it-works">
+        <h2>How NepApp Works</h2>
+        <div className="steps">
+          <div className="step">
+            <img src="/icons/profile.png" alt="Create Profile" />
+            <h3>Create Profile</h3>
+            <p>Sign up and create your profile with skills and experience.</p>
+          </div>
+          <div className="step">
+            <img src="/icons/search.png" alt="Find Opportunities" />
+            <h3>Find Opportunities</h3>
+            <p>Browse and apply for relevant jobs and projects.</p>
+          </div>
+          <div className="step">
+            <img src="/icons/connect.png" alt="Connect and Earn" />
+            <h3>Connect & Earn</h3>
+            <p>Get hired and receive payments through secure local gateways.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="stats">
+        <div className="stat-box"><h3>5000+</h3><p>Active Students</p></div>
+        <div className="stat-box"><h3>1000+</h3><p>Businesses</p></div>
+        <div className="stat-box"><h3>2500+</h3><p>Jobs Posted</p></div>
+        <div className="stat-box"><h3>NPR 10M+</h3><p>Paid to Students</p></div>
+      </section>
+
+      {/* Payment Partners */}
+      <section className="payment-partners">
+        <h2>Trusted Payment Partners</h2>
+        <img src="/images/esewa-logo.png" alt="eSewa" className="partner-logo" />
+      </section>
+
+      
     </div>
   );
 };

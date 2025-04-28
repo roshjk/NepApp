@@ -47,12 +47,15 @@ router.delete("/user/:id", isAuthenticated, isAdmin, async (req, res) => {
 // Jobs CRUD
 router.get("/jobs", isAuthenticated, isAdmin, async (req, res) => {
     try {
-        const jobs = await Job.find();
-        res.json(jobs);
+      const jobs = await Job.find().populate("postedBy", "name email");
+  
+      res.json(jobs);
     } catch (error) {
-        res.status(500).json({ message: "Failed to fetch jobs." });
+      console.error("Admin job fetch failed:", error);
+      res.status(500).json({ message: "Failed to fetch jobs." });
     }
-});
+  });
+  
 
 router.post("/job", isAuthenticated, isAdmin, async (req, res) => {
     try {
@@ -85,12 +88,27 @@ router.delete("/job/:id", isAuthenticated, isAdmin, async (req, res) => {
 // Applications CRUD
 router.get("/applications", isAuthenticated, isAdmin, async (req, res) => {
     try {
-        const applications = await Application.find();
-        res.json(applications);
+      const applications = await Application.find()
+        .populate("studentInfo", "name email")
+        .populate("jobInfo", "title");
+  
+      const filtered = applications.filter(
+        (app) => app.studentInfo && app.jobInfo
+      );
+  
+      const formatted = filtered.map((app) => ({
+        ...app._doc,
+        studentInfo: app.studentInfo,
+        jobInfo: { jobTitle: app.jobInfo.title },
+      }));
+  
+      res.json(formatted);
     } catch (error) {
-        res.status(500).json({ message: "Failed to fetch applications." });
+      console.error("Admin Application Fetch Error:", error);
+      res.status(500).json({ message: "Failed to fetch applications." });
     }
-});
+  });
+  
 
 router.post("/application", isAuthenticated, isAdmin, async (req, res) => {
     try {

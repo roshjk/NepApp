@@ -1,0 +1,35 @@
+.messaging-container {
+    display: flex;
+    height: 85vh;
+  }
+  
+  .user-list {
+    width: 250px;
+    border-right: 1px solid #ccc;
+    padding: 1rem;
+    background: #f5f5f5;
+    overflow-y: auto;
+  }
+  
+  .user-item {
+    cursor: pointer;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .user-item:hover,
+  .user-item.active {
+    background-color: #e1e1e1;
+  }
+  
+  .chat-area {
+    flex: 1;
+    padding: 1rem;
+  }
+  
+  .placeholder {
+    margin-top: 40%;
+    text-align: center;
+    color: #888;
+  }
+  

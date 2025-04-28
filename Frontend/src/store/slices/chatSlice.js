@@ -30,7 +30,6 @@ export const chatSlice = createSlice({
   },
 });
 
-// Export actions
 export const {
   setMessages,
   setUsers,
@@ -39,12 +38,13 @@ export const {
   setMessagesLoading,
 } = chatSlice.actions;
 
-// Export async actions
 export const getUsers = () => async (dispatch) => {
   dispatch(setUsersLoading(true));
   try {
-    const res = await axios.get("/messages/users");
-    dispatch(setUsers(res.data));
+    const res = await axios.get("http://localhost:4000/api/v1/user/all", {
+      withCredentials: true,
+    });
+    dispatch(setUsers(res.data.users));
   } catch (error) {
     toast.error(error.response?.data?.message || "Failed to fetch users.");
   } finally {

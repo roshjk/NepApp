@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { postJob } from "../store/slices/jobSlice";
 import { useNavigate } from "react-router-dom";
-
+import "./PostJob.css";
 const PostJob = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -71,97 +71,29 @@ const PostJob = () => {
   };
 
   return (
-    <div className="post-job-container">
-      <h2>Post a New Job</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {message && <p style={{ color: "green" }}>{message}</p>}
+    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-xl rounded-xl">
+      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Post a New Job</h2>
+      
+      {error && <p className="text-red-500 text-center">{error}</p>}
+      {message && <p className="text-green-500 text-center">{message}</p>}
 
-      <form onSubmit={handleSubmit} className="post-job-form" encType="multipart/form-data">
-        <input
-          type="text"
-          name="title"
-          placeholder="Job Title"
-          value={formData.title}
-          onChange={handleChange}
-          required
-        />
+      <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="text" name="title" placeholder="Job Title" value={formData.title} onChange={handleChange} required className="input" />
+          <input type="text" name="category" placeholder="Category" value={formData.category} onChange={handleChange} required className="input" />
+          <input type="text" name="subCategory" placeholder="Sub-category" value={formData.subCategory} onChange={handleChange} className="input" />
+          <input type="text" name="tags" placeholder="Tags (comma-separated)" value={formData.tags} onChange={handleChange} className="input" />
+          <input type="number" name="price" placeholder="Price (NPR)" value={formData.price} onChange={handleChange} required className="input" />
+          <input type="number" name="deliveryTime" placeholder="Delivery Time (days)" value={formData.deliveryTime} onChange={handleChange} required className="input" />
+          <input type="number" name="revisions" placeholder="Number of Revisions" value={formData.revisions} onChange={handleChange} className="input" />
+          <input type="text" name="features" placeholder="Features (comma-separated)" value={formData.features} onChange={handleChange} required className="input" />
+        </div>
 
-        <textarea
-          name="description"
-          placeholder="Job Description"
-          value={formData.description}
-          onChange={handleChange}
-          required
-        />
+        <textarea name="description" placeholder="Job Description" value={formData.description} onChange={handleChange} required className="input h-28" />
 
-        <input
-          type="text"
-          name="category"
-          placeholder="Category"
-          value={formData.category}
-          onChange={handleChange}
-          required
-        />
+        <input type="file" accept="image/*" onChange={handleFileChange} required className="w-full file-input" />
 
-        <input
-          type="text"
-          name="subCategory"
-          placeholder="Sub-category"
-          value={formData.subCategory}
-          onChange={handleChange}
-        />
-
-        <input
-          type="text"
-          name="tags"
-          placeholder="Tags (comma-separated)"
-          value={formData.tags}
-          onChange={handleChange}
-        />
-
-        <input
-          type="number"
-          name="price"
-          placeholder="Price"
-          value={formData.price}
-          onChange={handleChange}
-          required
-        />
-
-        <input
-          type="number"
-          name="deliveryTime"
-          placeholder="Delivery Time (days)"
-          value={formData.deliveryTime}
-          onChange={handleChange}
-          required
-        />
-
-        <input
-          type="number"
-          name="revisions"
-          placeholder="Number of Revisions"
-          value={formData.revisions}
-          onChange={handleChange}
-        />
-
-        <input
-          type="text"
-          name="features"
-          placeholder="Features (comma-separated)"
-          value={formData.features}
-          onChange={handleChange}
-          required
-        />
-
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          required
-        />
-
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300">
           {loading ? "Posting..." : "Post Job"}
         </button>
       </form>

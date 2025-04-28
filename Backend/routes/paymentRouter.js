@@ -1,24 +1,11 @@
 import express from "express";
-import {
-  initiatePayment,
-  verifyPayment,
-  releasePayment,
-  getPaymentStatus,
-} from "../controllers/paymentController.js";
-import { isAuthenticated, isAdmin } from "../middlewares/auth.js";
+import { isAuthenticated, isAuthorized } from "../middlewares/auth.js";
+import { khaltiVerify, handleKhaltiRedirect,callKhalti } from "../controllers/paymentController.js";
 
 const router = express.Router();
 
-// ✅ Business Pays Before Work Starts
-router.post("/initiate", isAuthenticated, initiatePayment);
-
-// ✅ Admin Verifies Payment
-router.post("/verify/:transactionId", isAuthenticated, isAdmin, verifyPayment);
-
-// ✅ Admin Releases Payment to Student
-router.post("/release/:jobId", isAuthenticated, isAdmin, releasePayment);
-
-// ✅ Get Payment Status
-router.get("/status/:jobId", isAuthenticated, getPaymentStatus);
+router.post("/khalti-verify", isAuthenticated, isAuthorized("Business"), khaltiVerify);
+router.get("/khalti/callback", handleKhaltiRedirect);
+router.post("/khalti/initiate", isAuthenticated, isAuthorized("Business"), callKhalti);
 
 export default router;

@@ -1,0 +1,129 @@
+.account_components {
+  max-width: 800px;
+  margin: 40px auto;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.08);
+  font-family: "Segoe UI", sans-serif;
+}
+
+.account_components h3 {
+  font-size: 28px;
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+/* Profile Picture */
+.profile-pic-container {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.profile-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #007bff;
+}
+
+/* Labels and Inputs */
+.account_components label {
+  display: block;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #555;
+}
+
+.account_components input[type="text"],
+.account_components input[type="email"],
+.account_components textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  font-size: 15px;
+  margin-bottom: 10px;
+  resize: none;
+}
+
+textarea:disabled, input:disabled {
+  background-color: #f9f9f9;
+  color: #555;
+}
+
+/* Profile Sections */
+.profile-section {
+  margin-top: 30px;
+}
+
+.profile-section ul {
+  list-style: disc inside;
+  padding-left: 20px;
+}
+
+.profile-section ul li {
+  margin-bottom: 8px;
+  color: #555;
+}
+
+/* Skills Badges */
+.skill-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.skill-badge {
+  background-color: #e0f0ff;
+  color: #007bff;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Resume Button */
+.resume-btn {
+  display: inline-block;
+  margin-top: 10px;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.resume-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Portfolio Links */
+.profile-section a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.profile-section a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .account_components {
+    margin: 20px;
+    padding: 20px;
+  }
+
+  .profile-img {
+    width: 90px;
+    height: 90px;
+  }
+}

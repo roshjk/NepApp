@@ -31,9 +31,9 @@ const Login = () => {
     if (user.role === "Admin") {
       navigateTo("/admin/dashboard");
     } else if (user.role === "Business") {
-      navigateTo("/business/dashboard");
+      navigateTo("/dashboard");
     } else {
-      navigateTo("/student/dashboard");
+      navigateTo("/dashboard");
     }
   }
 }, [dispatch, error, isAuthenticated, user, navigateTo]);

@@ -1,173 +1,152 @@
 import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams, useNavigate } from "react-router-dom";
+import { fetchSingleJob } from "../store/slices/jobSlice";
 import {
-  clearAllApplicationErrors,
   postApplication,
+  clearAllApplicationErrors,
   resetApplicationSlice,
 } from "../store/slices/applicationSlice";
 import { toast } from "react-toastify";
-import { fetchSingleJob } from "../store/slices/jobSlice";
-import { IoMdCash } from "react-icons/io";
-import { FaToolbox } from "react-icons/fa";
-import { FaLocationDot } from "react-icons/fa6";
+import "./PostApplication.css";
 
 const PostApplication = () => {
-  const { singleJob } = useSelector((state) => state.jobs);
-  const { isAuthenticated, user } = useSelector((state) => state.user);
-  const { loading, error, message } = useSelector(
-    (state) => state.applications
-  );
-
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { jobId } = useParams();
+
+  const { singleJob } = useSelector((state) => state.jobs);
+  const { user } = useSelector((state) => state.user);
+  const { loading, error, message } = useSelector((state) => state.applications);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
-  const [resume, setResume] = useState("");
+  const [resume, setResume] = useState(null);
 
-  const navigateTo = useNavigate();
-  const dispatch = useDispatch();
-
-  const handlePostApplication = (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("email", email);
-    formData.append("phone", phone);
-    formData.append("address", address);
-    formData.append("coverLetter", coverLetter);
-    if (resume) {
-      formData.append("resume", resume);
-    }
-    dispatch(postApplication(formData, jobId));
-  };
-
+  // Fetch job and pre-fill user details
   useEffect(() => {
+    dispatch(fetchSingleJob(jobId));
+
     if (user) {
       setName(user.name || "");
       setEmail(user.email || "");
       setPhone(user.phone || "");
       setAddress(user.address || "");
       setCoverLetter(user.coverLetter || "");
-      setResume((user.resume && user.resume.url) || "");
     }
+
     if (error) {
       toast.error(error);
       dispatch(clearAllApplicationErrors());
     }
+
     if (message) {
       toast.success(message);
       dispatch(resetApplicationSlice());
+      navigate("/dashboard");
     }
-    dispatch(fetchSingleJob(jobId));
-  }, [dispatch, error, message, jobId, user]);
+  }, [dispatch, jobId, user, error, message, navigate]);
 
-  let qualifications = [];
-  let responsibilities = [];
-  let offering = [];
-  if (singleJob.qualifications) {
-    qualifications = singleJob.qualifications.split(". ");
-  }
-  if (singleJob.responsibilities) {
-    responsibilities = singleJob.responsibilities.split(". ");
-  }
-  if (singleJob.offers) {
-    offering = singleJob.offers.split(". ");
-  }
-
-  const resumeHandler = (e) => {
+  const handleResumeChange = (e) => {
     const file = e.target.files[0];
-    setResume(file);
+    if (file && file.type === "application/pdf") {
+      setResume(file);
+    } else {
+      toast.error("Only PDF files are allowed.");
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("phone", phone);
+    formData.append("address", address);
+    formData.append("coverLetter", coverLetter);
+    if (resume) formData.append("resume", resume);
+
+    dispatch(postApplication(formData, jobId));
   };
 
   return (
-    <>
-      <article className="application_page">
-        <form>
-          <h3>Application Form</h3>
-          <div>
-            <label>Job Title</label>
-            <input type="text" placeholder={singleJob.title} disabled />
-          </div>
-          <div>
-            <label>Your Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div>
-            <label>Your Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <label>Phone Number</label>
-            <input
-              type="number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </div>
-          <div>
-            <label>Address</label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
-          </div>
-          {user && user.role === "Student" && (
-            <>
-              <div>
-                <label>Coverletter</label>
-                <textarea
-                  value={coverLetter}
-                  onChange={(e) => setCoverLetter(e.target.value)}
-                  rows={10}
-                />
-              </div>
-              <div>
-                <label>Resume</label>
-                <input type="file" onChange={resumeHandler} />
-              </div>
-            </>
-          )}
+    <section className="application_page">
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
+        <h3>Apply for: {singleJob?.title || "Loading..."}</h3>
 
-          {isAuthenticated && user.role === "Student" && (
-            <div style={{ alignItems: "flex-end" }}>
-              <button
-                className="btn"
-                onClick={handlePostApplication}
-                disabled={loading}
-              >  Apply
-              </button>
-            </div>
-          )}
-        </form>
+        <div>
+          <label>Full Name</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
 
-        <div className="job-details">
-            <header>
-        <h3>{singleJob.jobTitle}</h3>
-        {singleJob.personalWebsite && (
-      <Link target="_blank" to={singleJob.personalWebsite.url}>
-        {singleJob.personalWebsite.title}
-      </Link>
-    )}
-   <span>Pay</span>
-   <span>{singleJob.price}</span>
-    <p> {singleJob.category}</p>
-  </header>
-  </div>   
-      </article>
-    </>
+        <div>
+          <label>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label>Phone</label>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label>Address</label>
+          <input
+            type="text"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label>Cover Letter</label>
+          <textarea
+            value={coverLetter}
+            onChange={(e) => setCoverLetter(e.target.value)}
+            rows={5}
+            required
+          ></textarea>
+        </div>
+
+        <div>
+          <label>Upload Resume (PDF only)</label>
+          <input type="file" accept="application/pdf" onChange={handleResumeChange} required />
+        </div>
+
+        <button type="submit" className="btn" disabled={loading}>
+          {loading ? "Submitting..." : "Submit Application"}
+        </button>
+      </form>
+
+      <div className="job-details-preview">
+        <h4>Job Preview</h4>
+        <p><strong>Category:</strong> {singleJob?.category}</p>
+        <p><strong>Sub-category:</strong> {singleJob?.subCategory}</p>
+        <p><strong>Price:</strong> ₹{singleJob?.price}</p>
+        <p><strong>Delivery Time:</strong> {singleJob?.deliveryTime} days</p>
+        <p><strong>Revisions:</strong> {singleJob?.revisions}</p>
+      </div>
+    </section>
   );
 };
 

@@ -1,0 +1,208 @@
+.update-profile-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.08);
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .update-profile-container h2 {
+    font-size: 28px;
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  
+  /* Profile Picture */
+  .profile-picture-upload {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .profile-pic-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #007bff;
+    margin-bottom: 10px;
+  }
+  
+  /* Form Section */
+  .form-section {
+    margin-bottom: 30px;
+  }
+  
+  label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #555;
+    display: block;
+    margin-bottom: 8px;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="file"],
+  textarea {
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #f7f7f7;
+    transition: 0.3s;
+  }
+  
+  input:focus, textarea:focus {
+    border-color: #007bff;
+    background-color: #fff;
+    outline: none;
+  }
+  
+  /* Skills Section */
+  .skills-section {
+    margin-top: 30px;
+  }
+  
+  .skills-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .skill-badge {
+    background-color: #e0f0ff;
+    color: #007bff;
+    padding: 8px 14px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+  }
+  
+  .remove-skill {
+    background: none;
+    border: none;
+    color: #ff4d4f;
+    font-size: 16px;
+    margin-left: 8px;
+    cursor: pointer;
+  }
+  
+  /* Add Skill */
+  .add-skill-row {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .add-skill-row input {
+    flex: 1;
+  }
+  
+  .add-skill-btn {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .add-skill-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Nested Education and Experience */
+  .education-section,
+  .experience-section {
+    margin-top: 30px;
+  }
+  
+  .nested-field {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+  }
+  
+  .nested-field input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+  
+  .add-btn {
+    margin-top: 10px;
+    background-color: #28a745;
+    border: none;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .add-btn:hover {
+    background-color: #218838;
+  }
+  
+  .remove-btn {
+    background: none;
+    border: none;
+    color: #ff4d4f;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
+  /* Resume Upload */
+  .resume-section {
+    margin-top: 30px;
+  }
+  
+  .resume-link a {
+    color: #007bff;
+    font-weight: 600;
+  }
+  
+  .resume-link a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Save Button */
+  .save-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 30px;
+  }
+  
+  .save-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .update-profile-container {
+      padding: 20px;
+      margin: 20px;
+    }
+  
+    .nested-field {
+      flex-direction: column;
+    }
+  }
+  

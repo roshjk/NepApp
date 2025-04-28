@@ -10,7 +10,6 @@ const jobSlice = createSlice({
     message: null,
     singleJob: {},
     myJobs: [],
-    appliedJobs: [],
   },
   reducers: {
     requestForAllJobs(state) {
@@ -26,6 +25,7 @@ const jobSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+
     requestForSingleJob(state) {
       state.message = null;
       state.error = null;
@@ -40,6 +40,7 @@ const jobSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
+
     requestForPostJob(state) {
       state.message = null;
       state.error = null;
@@ -49,13 +50,16 @@ const jobSlice = createSlice({
       state.message = action.payload.message;
       state.error = null;
       state.loading = false;
-      state.jobs.push(action.payload.job);
+      if (action.payload.job) {
+        state.jobs.push(action.payload.job);
+      }
     },
     failureForPostJob(state, action) {
       state.message = null;
       state.error = action.payload;
       state.loading = false;
     },
+
     requestForDeleteJob(state) {
       state.loading = true;
       state.error = null;
@@ -72,6 +76,7 @@ const jobSlice = createSlice({
       state.error = action.payload;
       state.message = null;
     },
+
     requestForMyJobs(state) {
       state.loading = true;
       state.myJobs = [];
@@ -86,22 +91,7 @@ const jobSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    requestForApplyJob(state) {
-      state.loading = true;
-      state.error = null;
-      state.message = null;
-    },
-    successForApplyJob(state, action) {
-      state.loading = false;
-      state.error = null;
-      state.message = action.payload.message;
-      state.appliedJobs.push(action.payload.jobId);
-    },
-    failureForApplyJob(state, action) {
-      state.loading = false;
-      state.error = action.payload;
-      state.message = null;
-    },
+
     assignJobRequest(state) {
       state.loading = true;
       state.error = null;
@@ -117,7 +107,7 @@ const jobSlice = createSlice({
       state.message = null;
       state.error = action.payload;
     },
-    
+
     completeJobRequest(state) {
       state.loading = true;
       state.message = null;
@@ -133,7 +123,7 @@ const jobSlice = createSlice({
       state.message = null;
       state.error = action.payload;
     },
-    
+
     reviewJobRequest(state) {
       state.loading = true;
       state.message = null;
@@ -149,7 +139,7 @@ const jobSlice = createSlice({
       state.message = null;
       state.error = action.payload;
     },
-    
+
     clearAllErrors(state) {
       state.error = null;
     },
@@ -160,7 +150,6 @@ const jobSlice = createSlice({
       state.message = null;
       state.myJobs = [];
       state.singleJob = {};
-      state.appliedJobs = [];
     },
   },
 });
@@ -196,7 +185,10 @@ export const postJob = (data) => async (dispatch) => {
     const response = await axios.post(
       "http://localhost:4000/api/v1/job/post",
       data,
-      { withCredentials: true, headers: { "Content-Type":  "multipart/form-data" } }
+      {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      }
     );
     dispatch(jobSlice.actions.successForPostJob(response.data));
   } catch (error) {
@@ -210,9 +202,17 @@ export const updateJob = (jobId, data) => async (dispatch) => {
     const response = await axios.put(
       `http://localhost:4000/api/v1/job/${jobId}`,
       data,
-      { withCredentials: true, headers: { "Content-Type": "application/json" } }
+      {
+        withCredentials: true,
+        headers: { "Content-Type": "application/json" },
+      }
     );
-    dispatch(jobSlice.actions.successForPostJob({ message: "Job updated successfully", job: response.data.updatedJob }));
+    dispatch(
+      jobSlice.actions.successForPostJob({
+        message: "Job updated successfully",
+        job: response.data.updatedJob,
+      })
+    );
   } catch (error) {
     dispatch(jobSlice.actions.failureForPostJob(error.response?.data?.message));
   }
@@ -233,29 +233,29 @@ export const deleteJob = (id) => async (dispatch) => {
 export const getMyJobs = () => async (dispatch) => {
   dispatch(jobSlice.actions.requestForMyJobs());
   try {
-    const response = await axios.get("http://localhost:4000/api/v1/job/all", {
-      params: { myJobs: true }, // Assuming backend filters by user
-      withCredentials: true,
-    });
-    dispatch(jobSlice.actions.successForMyJobs(response.data.jobs));
+    const response = await axios.get(
+      `http://localhost:4000/api/v1/job/getmyjobs`,
+      { withCredentials: true }
+    );
+    dispatch(jobSlice.actions.successForMyJobs(response.data.myJobs));
+    dispatch(jobSlice.actions.clearAllErrors());
   } catch (error) {
     dispatch(jobSlice.actions.failureForMyJobs(error.response?.data?.message));
   }
 };
 
-export const applyForJob = (jobId) => async (dispatch) => {
-  dispatch(jobSlice.actions.requestForApplyJob());
+export const fetchMyJobs = () => async (dispatch) => {
+  dispatch(jobSlice.actions.requestForMyJobs());
   try {
-    const response = await axios.post(
-      "http://localhost:4000/api/v1/job/apply",
-      { jobId },
-      { withCredentials: true }
-    );
-    dispatch(jobSlice.actions.successForApplyJob({ ...response.data, jobId }));
+    const { data } = await axios.get("http://localhost:4000/api/v1/job/my-jobs", {
+      withCredentials: true,
+    });
+    dispatch(jobSlice.actions.successForMyJobs(data.jobs));
   } catch (error) {
-    dispatch(jobSlice.actions.failureForApplyJob(error.response?.data?.message));
+    dispatch(jobSlice.actions.failureForMyJobs(error.response?.data?.message));
   }
 };
+
 
 export const assignJob = (jobId, studentId) => async (dispatch) => {
   dispatch(jobSlice.actions.assignJobRequest());
@@ -298,7 +298,6 @@ export const submitReview = (jobId, reviewData) => async (dispatch) => {
     dispatch(jobSlice.actions.reviewJobFailure(error.response?.data?.message));
   }
 };
-
 
 export const { clearAllErrors, resetJobSlice } = jobSlice.actions;
 export default jobSlice.reducer;

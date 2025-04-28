@@ -1,0 +1,124 @@
+.account_components {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 20px;
+  }
+  
+  .student-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 15px 0;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  
+  .student-info:hover {
+    transform: scale(1.03);
+  }
+  
+  .student-profile-img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #007bff;
+  }
+  
+  .student-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .student-name:hover {
+    color: #007bff;
+    text-decoration: underline;
+  }
+  
+  .account_components h3 {
+    font-size: 26px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2d3748;
+  }
+  
+  .applications_container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+  
+  .card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+  }
+  
+  .card:hover {
+    transform: translateY(-4px);
+  }
+  
+  .card p {
+    font-size: 15px;
+    margin: 8px 0;
+    color: #4a5568;
+  }
+  
+  .card strong {
+    color: #2d3748;
+  }
+  
+  .card select {
+    padding: 6px 8px;
+    font-size: 14px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    background-color: #f7fafc;
+    margin-left: 10px;
+  }
+  
+  .btn,
+  .outline_btn {
+    display: inline-block;
+    margin-top: 12px;
+    margin-right: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+  
+  .btn {
+    background-color: #3182ce;
+    color: white;
+    border: none;
+  }
+  
+  .btn:hover {
+    background-color: #2b6cb0;
+  }
+  
+  .outline_btn {
+    background-color: transparent;
+    color: #e53e3e;
+    border: 1px solid #e53e3e;
+  }
+  
+  .outline_btn:hover {
+    background-color: #fee2e2;
+  }
+  
+  @media (max-width: 600px) {
+    .applications_container {
+      grid-template-columns: 1fr;
+    }
+  }
+  

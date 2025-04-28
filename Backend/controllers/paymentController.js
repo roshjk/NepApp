@@ -1,91 +1,96 @@
 import axios from "axios";
-import { Payment } from "../models/paymentSchema.js";
-import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
+import { Application } from "../models/applicationSchema.js";
 import ErrorHandler from "../middlewares/error.js";
+import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
+import { io } from "../server.js";
 
-const KHALTI_SECRET_KEY = "your_khalti_secret_key"; // Store in .env
+// ✅ INITIATE payment with Khalti
+export const callKhalti = catchAsyncErrors(async (req, res, next) => {
+  const formData = req.body;
 
-// ✅ Business Makes a Payment
-export const initiatePayment = catchAsyncErrors(async (req, res, next) => {
-  const { amount, jobId, studentId } = req.body;
-  const businessId = req.user._id;
+  try {
+    const response = await axios.post(
+      "https://dev.khalti.com/api/v2/epayment/initiate/",
+      formData,
+      {
+        headers: {
+          Authorization: `Key ${process.env.KHALTI_SECRET_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-  if (!amount || !jobId || !studentId) {
-    return next(new ErrorHandler("Amount, Job ID, and Student ID are required", 400));
+    return res.status(200).json({
+      message: "Khalti initiated",
+      payment_method: "khalti",
+      data: response.data,
+    });
+  } catch (err) {
+    console.log("Khalti Init Error:", err.response?.data || err.message);
+    return res.status(400).json({ error: err?.message || "Khalti init failed" });
   }
+});
 
-  const khaltiResponse = await axios.post(
-    "https://khalti.com/api/v2/payment/initiate/",
-    {
-      return_url: "http://yourfrontend.com/payment-success",
-      amount: amount * 100, // Khalti uses paisa (1 NPR = 100 paisa)
-      purchase_order_id: jobId,
-      purchase_order_name: "Job Payment",
-    },
+// ✅ VERIFY payment with Khalti
+export const khaltiVerify = catchAsyncErrors(async (req, res, next) => {
+  const { token, amount, applicationId } = req.body;
+
+  const response = await axios.post(
+    "https://dev.khalti.com/api/v2/payment/verify/",
+    { token, amount },
     {
       headers: {
-        Authorization: `Key ${KHALTI_SECRET_KEY}`,
+        Authorization: `Key ${process.env.KHALTI_SECRET_KEY}`,
+      },
+    }
+  );
+
+  if (response.data?.idx) {
+    const application = await Application.findById(applicationId);
+    if (!application) return next(new ErrorHandler("Application not found", 404));
+
+    application.paymentStatus = "pending"; // payment verified, now waiting for student to submit work
+    await application.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "✅ Payment verified successfully.",
+      transaction_id: response.data.idx,
+    });
+  } else {
+    return next(new ErrorHandler("Khalti verification failed", 400));
+  }
+});
+
+// ✅ Handle Redirect from Khalti
+export const handleKhaltiRedirect = catchAsyncErrors(async (req, res, next) => {
+  const { pidx, status, purchase_order_id } = req.query;
+
+  if (status !== "Completed") {
+    return res.redirect(`http://localhost:5173/dashboard?payment=failed`);
+  }
+
+  // Verify payment from Khalti
+  const response = await axios.post(
+    "https://a.khalti.com/api/v2/epayment/lookup/",
+    { pidx },
+    {
+      headers: {
+        Authorization: `Key ${process.env.KHALTI_SECRET_KEY}`,
         "Content-Type": "application/json",
       },
     }
   );
 
-  const payment = await Payment.create({
-    jobId,
-    businessId,
-    studentId,
-    transactionId: khaltiResponse.data.idx,
-    amount,
-    status: "Pending Verification",
-  });
+  if (response.data.status === "Completed") {
+    const application = await Application.findById(purchase_order_id);
+    if (!application) return next(new ErrorHandler("Application not found", 404));
 
-  res.status(201).json({
-    success: true,
-    message: "Payment initiated, waiting for admin verification.",
-    khaltiResponse: khaltiResponse.data,
-  });
-});
+    application.paymentStatus = "pending";
+    await application.save();
 
-// ✅ Admin Verifies Payment
-export const verifyPayment = catchAsyncErrors(async (req, res, next) => {
-  const { transactionId } = req.params;
-  const adminId = req.user._id;
-
-  const payment = await Payment.findOne({ transactionId });
-  if (!payment) return next(new ErrorHandler("Payment not found", 404));
-
-  if (payment.status !== "Pending Verification") {
-    return next(new ErrorHandler("Payment already processed", 400));
+    return res.redirect(`http://localhost:5173/dashboard?payment=success`);
   }
 
-  payment.status = "Verified";
-  payment.verifiedBy = adminId;
-  await payment.save();
-
-  res.status(200).json({ success: true, message: "Payment verified by admin." });
-});
-
-// ✅ Release Payment to Student (After Job Completion)
-export const releasePayment = catchAsyncErrors(async (req, res, next) => {
-  const { jobId } = req.params;
-  const adminId = req.user._id;
-
-  const payment = await Payment.findOne({ jobId, status: "Verified" });
-  if (!payment) return next(new ErrorHandler("Verified payment not found", 404));
-
-  payment.status = "Released";
-  payment.releasedBy = adminId;
-  await payment.save();
-
-  res.status(200).json({ success: true, message: "Payment released to student." });
-});
-
-// ✅ Get Payment Status (For Business and Admin)
-export const getPaymentStatus = catchAsyncErrors(async (req, res, next) => {
-  const { jobId } = req.params;
-  const payment = await Payment.findOne({ jobId });
-
-  if (!payment) return next(new ErrorHandler("Payment not found", 404));
-
-  res.status(200).json({ success: true, payment });
+  return res.redirect(`http://localhost:5173/dashboard?payment=failed`);
 });

@@ -4,15 +4,15 @@ import { toast } from "react-toastify";
 import {
   clearAllErrors,
   deleteJob,
-  getMyJobs,
   resetJobSlice,
+  fetchMyJobs, // ✅ updated import
 } from "../store/slices/jobSlice";
 import Spinner from "../components/Spinner";
+import "./MyJobs.css";
 
 const MyJobs = () => {
-  const { loading, error, myJobs, message } = useSelector(
-    (state) => state.jobs
-  );
+  const { loading, error, myJobs, message } = useSelector((state) => state.jobs);
+  const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -24,8 +24,10 @@ const MyJobs = () => {
       toast.success(message);
       dispatch(resetJobSlice());
     }
-    dispatch(getMyJobs());
-  }, [dispatch, error, message]);
+    if (user) {
+      dispatch(fetchMyJobs()); // ✅ changed from fetchMyJobsByUser()
+    }
+  }, [dispatch, error, message, user]);
 
   const handleDeleteJob = (id) => {
     dispatch(deleteJob(id));
@@ -35,61 +37,36 @@ const MyJobs = () => {
     <>
       {loading ? (
         <Spinner />
-      ) : myJobs && myJobs.length <= 0 ? (
-        <h1 style={{ fontSize: "1.4rem", fontWeight: "600" }}>
-          You have not posted any job!
-        </h1>
+      ) : !myJobs || myJobs.length === 0 ? (
+        <h2 style={{ fontWeight: 600 }}>You haven't posted any jobs yet.</h2>
       ) : (
         <div className="account_components">
-          <h3>My Jobs</h3>
+          <h3>My Posted Jobs</h3>
           <div className="applications_container">
             {myJobs.map((job) => (
-              <div className="card" key={job._id}>
-                {job.jobThumbnail && (
+              <div className="card" key={job?._id || Math.random()}>
+                {job?.jobThumbnail && (
                   <img
                     src={job.jobThumbnail}
                     alt="Thumbnail"
-                    style={{ width: "100%", maxHeight: "200px", objectFit: "cover", borderRadius: "8px" }}
+                    style={{
+                      width: "100%",
+                      maxHeight: 200,
+                      objectFit: "cover",
+                      borderRadius: 8,
+                    }}
                   />
                 )}
 
-                <p className="sub-sec">
-                  <span>Title:</span> {job.title}
-                </p>
-                <p className="sub-sec">
-                  <span>Description:</span> {job.description}
-                </p>
-                <p className="sub-sec">
-                  <span>Category:</span> {job.category}
-                </p>
-                {job.subCategory && (
-                  <p className="sub-sec">
-                    <span>Sub-category:</span> {job.subCategory}
-                  </p>
-                )}
-                <p className="sub-sec">
-                  <span>Tags:</span> {Array.isArray(job.tags) ? job.tags.join(", ") : job.tags}
-                </p>
-                <p className="sub-sec">
-                  <span>Price:</span> ${job.price}
-                </p>
-                <p className="sub-sec">
-                  <span>Delivery Time:</span> {job.deliveryTime} day(s)
-                </p>
-                {job.revisions && (
-                  <p className="sub-sec">
-                    <span>Revisions:</span> {job.revisions}
-                  </p>
-                )}
-                <p className="sub-sec">
-                  <span>Features:</span>{" "}
-                  {Array.isArray(job.features) ? job.features.join(", ") : job.features}
-                </p>
+                <p><strong>Title:</strong> {job?.title || "Untitled"}</p>
+                <p><strong>Category:</strong> {job?.category || "-"}</p>
+                <p><strong>Price:</strong> ${job?.price || 0}</p>
+                <p><strong>Delivery Time:</strong> {job?.deliveryTime || 0} days</p>
+                <p><strong>Status:</strong> {job?.status || "unknown"}</p>
+                <p><strong>Posted By:</strong> {job?.postedBy?.name || "Unknown"}</p>
+                <p><strong>Email:</strong> {job?.postedBy?.email || "N/A"}</p>
 
-                <button
-                  className="btn"
-                  onClick={() => handleDeleteJob(job._id)}
-                >
+                <button className="btn" onClick={() => handleDeleteJob(job?._id)}>
                   Delete Job
                 </button>
               </div>

@@ -1,0 +1,100 @@
+.account_components {
+    padding: 2rem;
+    max-width: 1000px;
+    margin: auto;
+  }
+  
+  .account_components h3 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+  
+  .applications_container {
+    display: grid;
+    gap: 1.5rem;
+  }
+  
+  .card {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
+    transition: all 0.3s ease;
+  }
+  
+  .card:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  }
+  
+  .card p {
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+  
+  .card textarea {
+    width: 100%;
+    font-size: 0.9rem;
+    padding: 0.6rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    resize: vertical;
+    background-color: #f9f9f9;
+  }
+  
+  .btn {
+    background-color: #6c63ff;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    margin-top: 0.75rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+  
+  .btn:hover {
+    background-color: #594fd0;
+  }
+  
+  .outline_btn {
+    background-color: transparent;
+    border: 1px solid #999;
+    color: #333;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    margin-top: 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  
+  .outline_btn:hover {
+    background-color: #f3f3f3;
+  }
+  
+  /* Optional: highlight status */
+  .card .status {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 6px;
+    display: inline-block;
+  }
+  
+  .status.accepted {
+    background-color: #e6ffed;
+    color: #1c7c38;
+  }
+  
+  .status.pending {
+    background-color: #fff8e1;
+    color: #b59f00;
+  }
+  
+  .status.rejected {
+    background-color: #ffebee;
+    color: #c62828;
+  }
+  

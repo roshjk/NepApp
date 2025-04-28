@@ -1,55 +1,69 @@
-import mongoose from "mongoose"; 
+import mongoose from "mongoose";
 
-const applicationSchema = new mongoose.Schema({
-  studentInfo: {
-    id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    name: { type: String, required: true },
-    email: {
+const applicationSchema = new mongoose.Schema(
+  {
+    studentInfo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Student information is required."],
+    },
+
+    resumeUrl: {
       type: String,
-      required: true,
-      //validate: [validator.isEmail, "Please provide a valid email."],
+      required: [true, "Resume URL is required."],
+      trim: true,
     },
-    phone: { type: String, required: true },
-    address: { type: String, required: true },
-    resume: {
-      public_id: { type: String, default: null },
-      url: { type: String, default: null },
+
+    coverLetter: {
+      type: String,
+      required: [true, "Cover letter is required."],
+      trim: true,
     },
-    coverLetter: { type: String, required: true },
-    role: { type: String, enum: ["Student"], required: true },
-  },
 
-  businessInfo: {
-    id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    role: { type: String, enum: ["Business"], required: true },
-  },
+    businessInfo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Business information is required."],
+    },
 
-  jobInfo: {
-    jobId: { type: mongoose.Schema.Types.ObjectId, ref: "Job", required: true },
-    jobTitle: { type: String, required: true },
-    category: { type: String },
-    subCategory: { type: String },
-    tags: [{ type: String }],
-    price: { type: Number },
-    deliveryTime: { type: Number },
-    revisions: { type: Number },
-    jobThumbnail: { type: String },
-  },
+    jobInfo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Job",
+      required: [true, "Job reference is required."],
+    },
 
-  deletedBy: {
-    student: { type: Boolean, default: false },
-    business: { type: Boolean, default: false },
-  },
+    deletedBy: {
+      student: { type: Boolean, default: false },
+      business: { type: Boolean, default: false },
+    },
 
-  status: {
-    type: String,
-    enum: ["pending", "accepted", "rejected"],
-    default: "pending",
-  },
+    status: {
+      type: String,
+      enum: ["pending", "accepted", "rejected"],
+      default: "pending",
+    },
 
-  createdAt: {
-    type: Date,
-    default: Date.now,
+    paymentStatus: {
+      type: String,
+      enum: ["unpaid", "pending", "released", "paid"],
+      default: "unpaid",
+    },
+
+    submissionStatus: {
+      type: String,
+      enum: ["none", "submitted", "approved", "rejected"],
+      default: "none",
+    },
+
+    submittedWork: {
+      type: String, // URL or description of submitted work
+      default: null,
+      trim: true,
+    },
   },
-});
-export const Application = mongoose.model("application", applicationSchema);
+  {
+    timestamps: true, // Adds createdAt and updatedAt automatically
+  }
+);
+
+export const Application = mongoose.model("Application", applicationSchema);

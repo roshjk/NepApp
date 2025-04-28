@@ -10,18 +10,24 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import PostApplication from "./pages/PostApplication";
 import Register from "./pages/Register";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch } from "react-redux";
 import { getUser } from "./store/slices/userSlice";
-import Chat from "./pages/Chat";
+
 import AdminDashboard from "./pages/AdminDashboard";
+import socket from "./socket";
+import { addNotification } from "./store/slices/notificationSlice";
+import StudentProfile from "./pages/StudentProfile";
+import { useSelector } from "react-redux";
+import Messaging from "./components/Messaging";
 
 
 // Create a wrapper component to use the useLocation hook
 const AppContent = () => {
   const dispatch = useDispatch();
   const location = useLocation(); // Get the current route
+  const { user } = useSelector((state) => state.user); 
 
   // Hide Navbar, Footer, and ToastContainer on the /admin/dashboard route
   const isAdminDashboard = location.pathname === "/admin/dashboard";
@@ -29,6 +35,21 @@ const AppContent = () => {
   useEffect(() => {
     dispatch(getUser());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (user?._id) {
+      socket.emit("join", user._id);
+      socket.on("notification", (data) => {
+      toast.info(data.message || "🔔 You have a new notification.");
+        
+        dispatch(addNotification(data));
+      });
+
+      return () => {
+        socket.off("notification");
+      };
+    }
+  }, [user, dispatch]);
 
   return (
     <>
@@ -40,11 +61,15 @@ const AppContent = () => {
         <Route path="/apply/:jobId" element={<PostApplication />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/chat" element={<Chat />} />
+        <Route path="/chat" element={<Messaging />} />
+        <Route path="/student/:id" element={<StudentProfile />} />
         <Route path="*" element={<NotFound />} />
-        
+        <Route path="/contact" element={<h1>Contact Us</h1>} />
+      
+    
 
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        
       </Routes>
       {!isAdminDashboard && <Footer />} {/* Conditionally render the Footer */}
       {!isAdminDashboard && <ToastContainer position="top-right" theme="dark" />}{" "}

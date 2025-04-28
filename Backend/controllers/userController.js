@@ -122,6 +122,16 @@ export const adminLogin = catchAsyncErrors(async (req, res, next) => {
 });
 
 
+
+export const getAllUsersExceptCurrent = async (req, res) => {
+  try {
+    const users = await User.find({ _id: { $ne: req.user._id } }).select("name email role");
+    res.status(200).json({ users });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch users", error: err.message });
+  }
+};
+
 export const logout = catchAsyncErrors(async (req, res, next) => {
     res.status(200).cookie("token", "", {
         expires: new Date(Date.now()),
@@ -140,49 +150,98 @@ export const getUser = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const updateProfile = catchAsyncErrors(async (req, res, next) => {
-    const { name, email, phone, address, coverLetter, firstNiche, secondNiche, thirdNiche } = req.body;
-
+    const {
+      name,
+      email,
+      phone,
+      address,
+      coverLetter,
+      bio,
+      skills,
+      education,
+      experience,
+      firstNiche,
+      secondNiche,
+      thirdNiche,
+    } = req.body;
+  
     const newUserData = {
-        name,
-        email,
-        phone,
-        address,
-        coverLetter,
-        niches: { firstNiche, secondNiche, thirdNiche },
+      name,
+      email,
+      phone,
+      address,
+      coverLetter,
+      bio,
+      skills: skills ? JSON.parse(skills) : [],
+      education: education ? JSON.parse(education) : [],
+      experience: experience ? JSON.parse(experience) : [],
+      niches: {
+        firstNiche,
+        secondNiche,
+        thirdNiche,
+      },
     };
-
-    // Ensure Student role has niches
-    if (req.user.role === "Student" && (!firstNiche || !secondNiche || !thirdNiche)) {
-        return next(new ErrorHandler("Please provide all preferred job niches.", 400));
+  
+    // Ensure Student has niches
+    if (
+      req.user.role === "Student" &&
+      (!firstNiche || !secondNiche || !thirdNiche)
+    ) {
+      return next(
+        new ErrorHandler("Please provide all preferred job niches.", 400)
+      );
     }
-
+  
     // Handle resume upload
     if (req.files?.resume) {
-        if (req.user.resume?.public_id) {
-            await cloudinary.uploader.destroy(req.user.resume.public_id);
+      if (req.user.resume?.public_id) {
+        await cloudinary.uploader.destroy(req.user.resume.public_id);
+      }
+  
+      const newResume = await cloudinary.uploader.upload(
+        req.files.resume.tempFilePath,
+        {
+          folder: "Student_Resume",
         }
-
-        const newResume = await cloudinary.uploader.upload(req.files.resume.tempFilePath, {
-            folder: "Student_Resume",
-        });
-
-        newUserData.resume = {
-            public_id: newResume.public_id,
-            url: newResume.secure_url,
-        };
+      );
+  
+      newUserData.resume = {
+        public_id: newResume.public_id,
+        url: newResume.secure_url,
+      };
     }
-
+  
+    // Handle profile picture upload
+    if (req.files?.profilePic) {
+      if (req.user.profilePic?.public_id) {
+        await cloudinary.uploader.destroy(req.user.profilePic.public_id);
+      }
+  
+      const newPic = await cloudinary.uploader.upload(
+        req.files.profilePic.tempFilePath,
+        {
+          folder: "Student_ProfilePic",
+        }
+      );
+  
+      newUserData.profilePic = {
+        public_id: newPic.public_id,
+        url: newPic.secure_url,
+      };
+    }
+  
     const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
-        new: true,
-        runValidators: true,
+      new: true,
+      runValidators: true,
     });
-
+  
     res.status(200).json({
-        success: true,
-        user,
-        message: "Profile updated successfully.",
+      success: true,
+      user,
+      message: "Profile updated successfully.",
     });
-});
+  });
+  
 
 export const updatePassword = catchAsyncErrors(async (req, res, next) => {
     const user = await User.findById(req.user.id).select("+password");
@@ -201,3 +260,17 @@ export const updatePassword = catchAsyncErrors(async (req, res, next) => {
 
     sendToken(user, 200, res, "Password updated successfully.");
 });
+
+export const getStudentProfile =  catchAsyncErrors(async (req, res, next) => {
+    const user = await User.findById(req.params.id)
+      .select("name profilePic bio skills education experience portfolio niches address role createdAt");
+  
+    if (!user) {
+      return next(new ErrorHandler("Student profile not found.", 404));
+    }
+  
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  });

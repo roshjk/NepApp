@@ -6,7 +6,7 @@ import updateProfileReducer from "./slices/updateProfileSlice";
 
 import themeReducer from "./slices/themeSlice"; 
 import chatReducer from "./slices/chatSlice"; 
-
+import notificationReducer from "./slices/notificationSlice";
 
 const store = configureStore({
   reducer: {
@@ -15,7 +15,7 @@ const store = configureStore({
     applications: applicationReducer,
     updateProfile: updateProfileReducer,
     theme: themeReducer,
-    
+    notifications: notificationReducer,
     chat: chatReducer, 
   },
 });

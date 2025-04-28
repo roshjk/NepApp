@@ -1,0 +1,45 @@
+.admin-section {
+    padding: 2rem;
+  }
+  
+  .admin-section h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.75rem;
+  }
+  
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  
+  .admin-table th,
+  .admin-table td {
+    padding: 0.75rem 1rem;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+  
+  .admin-table th {
+    background-color: #f4f4f4;
+  }
+  
+  .update-btn,
+  .delete-btn {
+    margin-right: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .update-btn {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .delete-btn {
+    background-color: #f44336;
+    color: white;
+  }
+  
