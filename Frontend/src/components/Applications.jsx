@@ -137,11 +137,12 @@ const Applications = () => {
                 </button>
               )}
 
-              {app.resumeUrl && (
-                <Link to={app.resumeUrl} className="btn" target="_blank">
-                  View Resume
-                </Link>
-              )}
+{app.resumeUrl && (
+  <a href={app.resumeUrl} className="btn" target="_blank" rel="noopener noreferrer">
+    View Resume
+  </a>
+)}
+
             <button
             className="btn"
             onClick={() => handleMessageClick(app.studentInfo._id)}

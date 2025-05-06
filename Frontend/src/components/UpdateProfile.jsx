@@ -85,8 +85,9 @@ const UpdateProfile = () => {
   };
   
   const handleAddSkill = () => {
-    setSkills([...skills, ""]);
+    setSkills((prev) => [...prev, ""]);
   };
+  
   
   const handleRemoveSkill = (index) => {
     setSkills((prev) => prev.filter((_, idx) => idx !== index));
@@ -188,21 +189,23 @@ const UpdateProfile = () => {
       </div>
 
       {/* Skills Section */}
-<div className="skills-section">
+      <div className="skills-section">
   <label>Skills</label>
   {skills.map((skill, idx) => (
-    <div key={idx} className="nested-field">
+    <div key={idx} className="skill-field">
       <input
         type="text"
         value={skill}
+        placeholder=""
         onChange={(e) => handleSkillChange(idx, e.target.value)}
-        placeholder="Enter a skill"
+        
       />
-      <button type="button" className="remove-btn" onClick={() => handleRemoveSkill(idx)}>❌</button>
+      <button type="button" className="remove-skill" onClick={() => handleRemoveSkill(idx)}>❌</button>
     </div>
   ))}
   <button type="button" className="add-btn" onClick={handleAddSkill}>+ Add Skill</button>
 </div>
+
 
       {/* Education Section */}
       <div className="education-section">

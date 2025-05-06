@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  appType: 'spa', 
   server: {
     proxy: {
       "/socket.io": {
@@ -12,7 +13,7 @@ export default defineConfig({
         ws: true,
       },
       "/api": {
-        target: "http://localhost:4000", // 👈 API proxy added here
+        target: "http://localhost:4000",
         changeOrigin: true,
         secure: false,
       },

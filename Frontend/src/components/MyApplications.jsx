@@ -112,11 +112,17 @@ const MyApplications = () => {
                   </>
               )}
 
-              {app.resumeUrl && (
-                <Link to={app.resumeUrl} className="btn" target="_blank">
-                  View Resume (PDF)
-                </Link>
-              )}
+{app.resumeUrl && (
+  <a
+    href={app.resumeUrl}
+    className="btn"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{ marginTop: "10px" }}
+  >
+    📄 View Resume
+  </a>
+)}
 
               <button className="outline_btn" onClick={() => handleDelete(app._id)}>
                 Delete Application

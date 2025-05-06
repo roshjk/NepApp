@@ -23,20 +23,7 @@ const Footer = () => {
           background: "#f9f9f9", // Light background
         }}
       >
-        {/* Logo Section */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <img
-            src="/logo.jpg"
-            alt="logo"
-            style={{ width: "100px", height: "auto" }}
-          />
-        </div>
+    
 
         {/* Support Section */}
         <div>

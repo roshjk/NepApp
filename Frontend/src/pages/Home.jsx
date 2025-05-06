@@ -20,9 +20,7 @@ const Home = () => {
             <Link to="/register/business" className="btn business">I'm a Business</Link>
           </div>
         </div>
-        <div className="hero-right">
-          <img src="/images/landing-illustration.png" alt="Students and Business" />
-        </div>
+       
       </section>
 
       {/* How NepApp Works */}
@@ -30,17 +28,17 @@ const Home = () => {
         <h2>How NepApp Works</h2>
         <div className="steps">
           <div className="step">
-            <img src="/icons/profile.png" alt="Create Profile" />
+           
             <h3>Create Profile</h3>
             <p>Sign up and create your profile with skills and experience.</p>
           </div>
           <div className="step">
-            <img src="/icons/search.png" alt="Find Opportunities" />
+           
             <h3>Find Opportunities</h3>
             <p>Browse and apply for relevant jobs and projects.</p>
           </div>
           <div className="step">
-            <img src="/icons/connect.png" alt="Connect and Earn" />
+       
             <h3>Connect & Earn</h3>
             <p>Get hired and receive payments through secure local gateways.</p>
           </div>

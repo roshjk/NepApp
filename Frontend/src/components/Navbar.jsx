@@ -29,7 +29,7 @@ const Navbar = () => {
             <li><Link to="/" onClick={() => setShow(false)}>Home</Link></li>
             <li><Link to="/jobs" onClick={() => setShow(false)}>Find Gigs</Link></li>
             <li><Link to="/chat" onClick={() => setShow(false)}>Chat</Link></li>
-            <li><Link to="/student" onClick={() => setShow(false)}>Profile</Link></li>
+            
             <li><Link to="/contact" onClick={() => setShow(false)}>Contact</Link></li>
           </ul>
         </div>
@@ -61,6 +61,7 @@ const Navbar = () => {
                 )}
               </div>
               <Link to="/dashboard" className="btn-outline">Dashboard</Link>
+             
             </>
           ) : (
             <>

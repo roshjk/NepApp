@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { postJob } from "../store/slices/jobSlice";
 import { useNavigate } from "react-router-dom";
 import "./PostJob.css";
+
 const PostJob = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -71,14 +72,14 @@ const PostJob = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-xl rounded-xl">
-      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Post a New Job</h2>
-      
-      {error && <p className="text-red-500 text-center">{error}</p>}
-      {message && <p className="text-green-500 text-center">{message}</p>}
+    <div className="form-wrapper">
+      <h2>Post a New Job</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {error && <p className="error-message">{error}</p>}
+      {message && <p className="success-message">{message}</p>}
+
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
+        <div className="form-grid">
           <input type="text" name="title" placeholder="Job Title" value={formData.title} onChange={handleChange} required className="input" />
           <input type="text" name="category" placeholder="Category" value={formData.category} onChange={handleChange} required className="input" />
           <input type="text" name="subCategory" placeholder="Sub-category" value={formData.subCategory} onChange={handleChange} className="input" />
@@ -89,11 +90,11 @@ const PostJob = () => {
           <input type="text" name="features" placeholder="Features (comma-separated)" value={formData.features} onChange={handleChange} required className="input" />
         </div>
 
-        <textarea name="description" placeholder="Job Description" value={formData.description} onChange={handleChange} required className="input h-28" />
+        <textarea name="description" placeholder="Job Description" value={formData.description} onChange={handleChange} required className="input" />
 
-        <input type="file" accept="image/*" onChange={handleFileChange} required className="w-full file-input" />
+        <input type="file" accept="image/*" onChange={handleFileChange} required className="file-input" />
 
-        <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300">
+        <button type="submit" disabled={loading}>
           {loading ? "Posting..." : "Post Job"}
         </button>
       </form>

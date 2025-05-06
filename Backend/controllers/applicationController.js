@@ -28,31 +28,44 @@ export const postApplication = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("You have already applied for this job.", 400));
   }
 
-  let resumeUrl = req.user.resume?.url;
+  
 
-  if (req.files?.resume) {
-    try {
-      const upload = await cloudinary.uploader.upload(req.files.resume.tempFilePath, {
-        folder: "Student_Resumes",
-        resource_type: "raw", // Important for PDF
-      });
-      resumeUrl = upload.secure_url;
-    } catch (err) {
-      return next(new ErrorHandler("Failed to upload resume.", 500));
+if (req.files && req.files.resume) {
+  const { resume } = req.files;
+  try {
+    const cloudinaryResponse = await cloudinary.uploader.upload(
+      resume.tempFilePath,
+      {
+        folder: "Student_Resume",
+        resource_type: "raw",
+      }
+    );
+    
+    if (!cloudinaryResponse || cloudinaryResponse.error) {
+      return next(
+        new ErrorHandler("Failed to upload resume to cloudinary.", 500)
+      );
     }
+    resumeUrl = cloudinaryResponse.secure_url;  // ✅ Just update resumeUrl here
+  } catch (error) {
+    return next(new ErrorHandler("Failed to upload resume. Fill size more than 5MB", 500));
   }
+}
 
-  if (!resumeUrl) {
-    return next(new ErrorHandler("Please upload your resume.", 400));
-  }
+// Finally check
+if (!resumeUrl) {
+  return next(new ErrorHandler("Please upload your resume.", 400));
+}
 
-  const application = await Application.create({
-    studentInfo: req.user._id,
-    resumeUrl,
-    coverLetter,
-    businessInfo: job.postedBy,
-    jobInfo: job._id,
-  });
+// Now create Application properly:
+const application = await Application.create({
+  studentInfo: req.user._id,
+  resumeUrl, // ✅ Assign correctly
+  coverLetter,
+  businessInfo: job.postedBy,
+  jobInfo: job._id,
+});
+
   
   io.to(job.postedBy.toString()).emit("notification", {
     type: "application",

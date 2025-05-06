@@ -5,6 +5,7 @@ import "./ChatWindow.css";
 const ChatWindow = ({ selectedUser }) => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const bottomRef = useRef(null);
 
   const fetchMessages = async () => {
@@ -31,6 +32,7 @@ const ChatWindow = ({ selectedUser }) => {
 
       setMessages((prev) => [...prev, data.message]);
       setText("");
+      setIsTyping(false);
     } catch (err) {
       console.error("Failed to send message", err);
     }
@@ -44,28 +46,45 @@ const ChatWindow = ({ selectedUser }) => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    if (!text) return setIsTyping(false);
+    setIsTyping(true);
+    const timeout = setTimeout(() => setIsTyping(false), 2000);
+    return () => clearTimeout(timeout);
+  }, [text]);
+
   return (
-    <div className="chat-window">
+    <div className="chat-container">
       <div className="chat-header">
-        <h2>💬 Chat with <span>{selectedUser?.name}</span></h2>
+        💬 Chat with <span>{selectedUser?.name}</span>
       </div>
 
-      <div className="chat-body">
-        {messages.map((msg) => (
-          <div
-            key={msg._id}
-            className={`chat-bubble ${
-              msg.sender._id === selectedUser._id ? "received" : "sent"
-            }`}
-          >
-            <p>{msg.text}</p>
-            <span className="timestamp">{new Date(msg.createdAt).toLocaleTimeString()}</span>
-          </div>
-        ))}
+      <div className="chat-messages">
+        {messages.map((msg) => {
+          const isReceived = msg.sender._id === selectedUser._id;
+          return (
+            <div key={msg._id} className={`chat-row ${isReceived ? "left" : "right"}`}>
+              {isReceived && (
+                <img
+                  src={msg.sender.avatar || "/default-avatar.png"}
+                  alt="avatar"
+                  className="avatar"
+                />
+              )}
+              <div className={`chat-bubble ${isReceived ? "received" : "sent"}`}>
+                <p>{msg.text}</p>
+                <span className="timestamp">
+                  {new Date(msg.createdAt).toLocaleTimeString()}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+        {isTyping && <div className="typing-indicator">Typing...</div>}
         <div ref={bottomRef}></div>
       </div>
 
-      <div className="chat-input">
+      <div className="chat-input-bar">
         <input
           type="text"
           placeholder="Type your message..."
